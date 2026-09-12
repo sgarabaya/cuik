@@ -1,4 +1,4 @@
-# Cuerre
+# Cuik Foods
 
 Este es un proyecto para la materia Programacion Avanzada
 
