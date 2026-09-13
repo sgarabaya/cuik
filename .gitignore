@@ -1,0 +1,12 @@
+.docker-pull
+
+.idea
+.vscode
+.gradle
+
+build/
+bin/
+.kotlin
+.local
+
+node_modules
