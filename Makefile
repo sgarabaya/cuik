@@ -1,3 +1,5 @@
+DB_ROOT_CONNECTION_STRING="root:pwd_root@/cuik"
+
 build: build-server
 	@echo 'Done.'
 
@@ -8,6 +10,9 @@ build-server: clean-server bin
 	gradle -p cuik-server build
 	gradle -p cuik-server shadowJar
 	mv cuik-server/cuik.jar ./bin/
+
+build-cmd: bin
+	go build -C ./cuik-cmd -o ../bin/cuik-cmd -ldflags "-s -w -X 'cuik-cmd/config.ConnectionString=$(DB_ROOT_CONNECTION_STRING)'"
 
 clean-server:
 	gradle -p cuik-server clean
