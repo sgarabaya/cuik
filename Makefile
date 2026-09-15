@@ -30,6 +30,9 @@ db: .docker-pull
 		-v ./.local:/config \
 		lscr.io/linuxserver/mariadb:latest
 
+	@sleep 1 # dormimos un cachin para que Docker termine de armar el container
+	docker exec -i mariadb mariadb < db.sql
+
 clean-db:
 	docker stop mariadb
 	docker rm mariadb
