@@ -4,8 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import cuik.utilities.Transform;
-
 public class MenuItem extends BaseEntity {
     public UUID menuCategoryId;
     public String description;
@@ -20,7 +18,7 @@ public class MenuItem extends BaseEntity {
 
     public MenuItem(ResultSet resultSet) throws SQLException {
         super(resultSet);
-        menuCategoryId = Transform.bytesToUUID(resultSet.getBytes("menuCategoryId"));
+        menuCategoryId = UUID.fromString(resultSet.getString("menuCategoryId"));
         description = resultSet.getString("description");
 
         price = resultSet.getDouble("price");
