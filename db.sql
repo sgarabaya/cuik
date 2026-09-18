@@ -28,4 +28,24 @@ CREATE TABLE IF NOT EXISTS `Employee` (
     `isAdmin` BIT DEFAULT 0
 );
 
+/*
+Insert test records:
+*/
+
+INSERT IGNORE INTO
+    `Employee` (
+        `id`,
+        `name`,
+        `email`,
+        `passwordHash`,
+        `isAdmin`
+    )
+VALUES (
+        '00000000-0000-0000-0000-000000000000',
+        'admin',
+        'admin@cuik.food',
+        '$argon2i$v=19$m=65536,t=10,p=1$yS/ozAZroTl+zQVklkg5Hg$oNf3i23mu9kUnzVCuTnA0Gtlh1LDq4RnpDSR8a2ytvg', -- pwd: "admin"
+        1
+    );
+
 \! echo 'Done.';
