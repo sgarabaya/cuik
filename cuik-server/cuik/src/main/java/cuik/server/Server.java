@@ -12,6 +12,9 @@ public class Server {
 
     public void start() throws Exception {
         server.start();
+    }
+
+    public void await() throws Exception {
         server.join();
     }
 }

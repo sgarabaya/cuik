@@ -4,17 +4,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class User extends BaseEntity {
-    public String username;
-    public String passwordHash;
+    public String name;
     public String email;
+    public String passwordHash;
 
     public User() {
     }
 
     public User(ResultSet resultSet) throws SQLException {
         super(resultSet);
-        username = resultSet.getString("username");
-        passwordHash = resultSet.getString("passwordHash");
+        name = resultSet.getString("name");
         email = resultSet.getString("email");
+        passwordHash = resultSet.getString("passwordHash");
     }
 }

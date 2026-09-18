@@ -17,6 +17,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.16")
     implementation("org.eclipse.jetty:jetty-server:12.0.12")
     // implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:12.0.12")
+    implementation("de.mkammerer:argon2-jvm:2.12")
 }
 
 tasks.withType<JavaCompile> {
@@ -31,7 +32,7 @@ tasks.withType<Jar> {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -40,6 +41,7 @@ tasks.shadowJar {
 
     minimize {
         exclude(dependency("org.slf4j:.*:.*"))
+        exclude(dependency("com.mysql:mysql-connector-j:.*"))
     }
     mergeServiceFiles()
     archiveFileName = "cuik.jar"

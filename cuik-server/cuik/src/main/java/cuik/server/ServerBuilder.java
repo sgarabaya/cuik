@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import cuik.controllers.UserController;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Get;
@@ -15,7 +14,9 @@ import cuik.server.annotations.Post;
 import cuik.server.router.RouteHandler;
 import cuik.server.router.Router;
 import cuik.utilities.Container;
-import cuik.utilities.Tuple;
+import cuik.utilities.CuikInternalException;
+import cuik.utilities.Transform;
+import cuik.utilities.Tuple3;
 
 public class ServerBuilder {
     private final Logger logger;
@@ -33,7 +34,7 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder useController(Class<UserController> controller) throws RuntimeException {
+    public ServerBuilder useController(Class<?> controller) throws RuntimeException {
         if (!controller.isAnnotationPresent(Controller.class))
             throw new RuntimeException(controller.getName() + " is not a valid Controller");
 
@@ -75,16 +76,16 @@ public class ServerBuilder {
 
     private RouteHandler createHandler(Class<?> controller, Method method) {
         var methodParameters = method.getParameters();
-        var parameterAnnotations = new ArrayList<Tuple<String, Boolean>>();
+        var parameterAnnotations = new ArrayList<Tuple3<String, Class<?>, Boolean>>();
 
         for (int i = 0; i < methodParameters.length; i += 1) {
             var param = methodParameters[i];
 
             if (param.isAnnotationPresent(FromBody.class)) {
-                parameterAnnotations.add(new Tuple<>(param.getName(), true));
+                parameterAnnotations.add(new Tuple3<>(param.getName(), param.getType(), true));
             } else {
                 String name = param.getName();
-                parameterAnnotations.add(new Tuple<>(name, false));
+                parameterAnnotations.add(new Tuple3<>(name, param.getType(), false));
             }
         }
 
@@ -101,9 +102,11 @@ public class ServerBuilder {
                 for (int i = 0; i < parameterAnnotations.size(); i += 1) {
                     var param = parameterAnnotations.get(i);
 
-                    if (param.b()) {
+                    if (param.c()) {
                         if (context.isJson())
-                            paramValues[i] = context.parseBody(param.getClass());
+                            paramValues[i] = context.parseBody(param.b());
+                        else
+                            throw new CuikInternalException("Should have been JSON?");
                     } else {
                         System.out.println("Param: " + param.a());
                         System.out.println(context.getQueryParam(param.a()));
@@ -114,7 +117,7 @@ public class ServerBuilder {
                 context.respond(method.invoke(ctl, paramValues));
             } catch (Exception ex) {
                 context.logger.log(Level.SEVERE, "Execution failure", ex);
-                context.respond(ex);
+                context.respond(ex.getMessage());
             }
         };
 

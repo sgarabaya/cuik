@@ -19,7 +19,15 @@ clean-server:
 tag:
 	docker build -t cuik-server:$(version) cuik-server
 
-db: .docker-pull
+# set up init db for mariadb
+.local:
+	mkdir -p .local/initdb.d/
+	cp *.sql .local/initdb.d/
+
+db-client:
+	docker exec -it mariadb mariadb
+
+db: .docker-pull .local
 	docker run -d \
 		--name=mariadb \
 		-e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC \
@@ -29,9 +37,6 @@ db: .docker-pull
 		-p 3306:3306 \
 		-v ./.local:/config \
 		lscr.io/linuxserver/mariadb:latest
-
-	@sleep 1 # dormimos un cachin para que Docker termine de armar el container
-	docker exec -i mariadb mariadb < db.sql
 
 clean-db:
 	docker stop mariadb
