@@ -1,11 +1,11 @@
 package cuik.server.router;
 
+import cuik.utilities.Tuple;
 import java.util.ArrayList;
 import java.util.List;
 
-import cuik.utilities.Tuple;
-
 public class Router {
+
     private final RouteNode root = new RouteNode();
 
     public void addRoute(String method, String path, RouteHandler handler) {
@@ -13,8 +13,10 @@ public class Router {
 
         var node = root;
         for (var part : route.parts()) {
-            if (!node.children.containsKey(part))
-                node.children.put(part, new RouteNode());
+            if (!node.children.containsKey(part)) node.children.put(
+                part,
+                new RouteNode()
+            );
             node = node.children.get(part);
         }
         node.route = route;
@@ -24,8 +26,7 @@ public class Router {
         var params = new ArrayList<String>();
         var node = root.children.getOrDefault(new RoutePart(method), null);
 
-        if (node == null)
-            return null;
+        if (node == null) return null;
 
         var fragments = trimSlash(url).trim().split("/");
         for (var fragment : fragments) {
@@ -48,11 +49,9 @@ public class Router {
     }
 
     private static String trimSlash(String path) {
-        if (path.startsWith("/"))
-            path = path.substring(1);
+        if (path.startsWith("/")) path = path.substring(1);
 
-        if (path.endsWith("/"))
-            path = path.substring(0, path.length() - 1);
+        if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
 
         return path;
     }

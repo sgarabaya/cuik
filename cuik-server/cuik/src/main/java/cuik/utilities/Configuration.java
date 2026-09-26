@@ -1,16 +1,15 @@
 package cuik.utilities;
 
+import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.Gson;
-
-class ConfigMap extends HashMap<String, String> {
-}
+class ConfigMap extends HashMap<String, String> {}
 
 public abstract class Configuration {
+
     private static Map<String, String> configValues;
 
     public static void loadConfig() throws Exception {
@@ -32,15 +31,16 @@ public abstract class Configuration {
     }
 
     public static String get(String key, String _default) {
-        if (configValues.containsKey(key))
-            return configValues.get(key);
+        if (configValues.containsKey(key)) return configValues.get(key);
 
         var prop = System.getProperty(key);
 
-        if (prop == null || prop.isEmpty())
-            prop = System.getenv(key);
+        if (prop == null || prop.isEmpty()) prop = System.getenv(key);
 
-        configValues.put(key, prop != null && !prop.isEmpty() ? prop : _default);
+        configValues.put(
+            key,
+            prop != null && !prop.isEmpty() ? prop : _default
+        );
         return configValues.get(key);
     }
 

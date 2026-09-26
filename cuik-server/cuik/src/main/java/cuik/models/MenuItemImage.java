@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class MenuItemImage extends BaseEntity {
+
     public UUID menuItemId;
     public String url;
 
-    public MenuItemImage() {
-    }
+    public MenuItemImage() {}
 
     public MenuItemImage(ResultSet resultSet) throws SQLException {
         super(resultSet);

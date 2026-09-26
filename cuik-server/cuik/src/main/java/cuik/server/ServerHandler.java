@@ -1,18 +1,17 @@
 package cuik.server;
 
+import cuik.server.router.Router;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
-import cuik.server.router.Router;
-
 public class ServerHandler extends Handler.Abstract {
+
     private final Router router;
 
     public ServerHandler(Router router) {
@@ -31,7 +30,11 @@ public class ServerHandler extends Handler.Abstract {
     }
 
     @Override
-    public boolean handle(Request request, Response response, Callback callback) {
+    public boolean handle(
+        Request request,
+        Response response,
+        Callback callback
+    ) {
         var method = request.getMethod().toUpperCase();
         var path = request.getHttpURI().getPath();
 
@@ -46,7 +49,13 @@ public class ServerHandler extends Handler.Abstract {
 
         var logger = Logger.getLogger(String.format("[%s] %s", method, path));
 
-        var context = new HttpContext(logger, request, response, callback, params);
+        var context = new HttpContext(
+            logger,
+            request,
+            response,
+            callback,
+            params
+        );
 
         route.handler().func(context);
 

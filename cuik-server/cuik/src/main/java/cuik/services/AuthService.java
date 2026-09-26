@@ -1,18 +1,17 @@
 package cuik.services;
 
-import java.util.UUID;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-
 import cuik.adapters.UserAdapter;
 import cuik.models.User;
 import cuik.utilities.Configuration;
 import cuik.utilities.Crypto;
 import cuik.utilities.Tuple;
+import java.util.UUID;
 
 public class AuthService {
+
     private final UserAdapter userAdapter;
 
     public AuthService(UserAdapter userAdapter) {
@@ -22,8 +21,7 @@ public class AuthService {
     public String authenticateUser(String name, String password) {
         var user = userAdapter.findByUsername(name);
 
-        if (user == null)
-            return null; // El usuario no existe
+        if (user == null) return null; // El usuario no existe
 
         if (Crypto.verify(user.passwordHash, password)) {
             try {
@@ -39,12 +37,15 @@ public class AuthService {
         return null;
     }
 
-    public Tuple<User, String> registerUser(String name, String email, String password) {
+    public Tuple<User, String> registerUser(
+        String name,
+        String email,
+        String password
+    ) {
         try {
             var user = userAdapter.findByUsername(name);
 
-            if (user != null)
-                return null; // El usuario ya existe
+            if (user != null) return null; // El usuario ya existe
 
             user = new User();
 

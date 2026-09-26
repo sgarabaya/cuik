@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class MenuCategory extends BaseEntity {
+
     public UUID menuId;
     public String title;
 
-    public MenuCategory() {
-    }
+    public MenuCategory() {}
 
     public MenuCategory(ResultSet resultSet) throws SQLException {
         super(resultSet);

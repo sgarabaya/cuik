@@ -1,13 +1,13 @@
 package cuik.adapters;
 
+import cuik.adapters.sql.SqlClient;
+import cuik.models.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import cuik.adapters.sql.SqlClient;
-import cuik.models.User;
-
 public class UserAdapter {
+
     protected String table = "Users";
     private SqlClient client;
 
@@ -17,15 +17,15 @@ public class UserAdapter {
 
     public void create(User user) {
         try {
-            if (user.id == null)
-                user.id = UUID.randomUUID();
+            if (user.id == null) user.id = UUID.randomUUID();
 
-            client.exec("INSERT INTO Users (id, name, email, passwordHash) VALUES (?, ?, ?, ?);",
-                    user.id.toString(),
-                    user.name,
-                    user.email,
-                    user.passwordHash);
-
+            client.exec(
+                "INSERT INTO Users (id, name, email, password_hash) VALUES (?, ?, ?, ?);",
+                user.id.toString(),
+                user.name,
+                user.email,
+                user.passwordHash
+            );
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

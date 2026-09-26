@@ -1,0 +1,26 @@
+services:
+  # web:
+  #   build: ./cuik-server
+  #   ports:
+  #     - "8080:8080"
+  #   profiles: [api,full]
+  #   environment:
+  #     DB_HOST: db
+  #     DB_NAME: cuik
+  #     DB_USER: cuik
+  #     DB_PWD: cuik-pwd
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./www:/var/www/html
+  db:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_USER: cuik
+      MYSQL_PASSWORD: cuik-pwd
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cuik
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d

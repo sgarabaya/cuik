@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class MenuItem extends BaseEntity {
+
     public UUID menuCategoryId;
     public String description;
     public String[] allergens; // TODO: Mapear manualmente
@@ -13,8 +14,7 @@ public class MenuItem extends BaseEntity {
     public double unit;
     public boolean available;
 
-    public MenuItem() {
-    }
+    public MenuItem() {}
 
     public MenuItem(ResultSet resultSet) throws SQLException {
         super(resultSet);

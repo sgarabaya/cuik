@@ -1,5 +1,3 @@
 package cuik.models.pojo;
 
-public record RegisterResponse(String id, String token) {
-
-}
+public record RegisterResponse(String id, String token) {}

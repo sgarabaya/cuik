@@ -1,5 +1,7 @@
 package cuik.adapters.sql;
 
+import cuik.utilities.Configuration;
+import cuik.utilities.CuikInternalException;
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,32 +13,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import cuik.utilities.Configuration;
-import cuik.utilities.CuikInternalException;
-
 public class SqlClient {
+
     private static HashMap<Class<?>, Constructor<?>> cache = new HashMap<>();
 
     public Connection connect() throws SQLException {
         return DriverManager.getConnection(
-                Configuration.getConnectionString(),
-                Configuration.getDatabaseUser(),
-                Configuration.getDatabasePassword());
+            Configuration.getConnectionString(),
+            Configuration.getDatabaseUser(),
+            Configuration.getDatabasePassword()
+        );
     }
 
-    private Constructor<?> getConstructor(Class<?> classT) throws CuikInternalException {
+    private Constructor<?> getConstructor(Class<?> classT)
+        throws CuikInternalException {
         try {
-            if (!cache.containsKey(classT))
-                cache.put(classT, classT.getConstructor(ResultSet.class));
+            if (!cache.containsKey(classT)) cache.put(
+                classT,
+                classT.getConstructor(ResultSet.class)
+            );
 
             return cache.get(classT);
         } catch (NoSuchMethodException ex) {
-            throw new CuikInternalException("Mappable model needs an empty constructor", ex);
+            throw new CuikInternalException(
+                "Mappable model needs an empty constructor",
+                ex
+            );
         }
     }
 
-    private PreparedStatement prepareStatement(Connection connection, String query, Object... parameters)
-            throws SQLException {
+    private PreparedStatement prepareStatement(
+        Connection connection,
+        String query,
+        Object... parameters
+    ) throws SQLException {
         var statement = connection.prepareStatement(query);
         for (var i = 0; i < parameters.length; i += 1) {
             switch (parameters[i].getClass().getSimpleName()) {
@@ -65,7 +75,11 @@ public class SqlClient {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T querySingle(Class<T> classT, String query, Object... parameters) throws CuikInternalException {
+    public <T> T querySingle(
+        Class<T> classT,
+        String query,
+        Object... parameters
+    ) throws CuikInternalException {
         try {
             var connection = connect();
             var constructor = getConstructor(classT);
@@ -74,21 +88,32 @@ public class SqlClient {
 
             T result = null;
 
-            if (resultSet.next())
-                result = (T) constructor.newInstance(resultSet);
+            if (resultSet.next()) result = (T) constructor.newInstance(
+                resultSet
+            );
 
             connection.close();
 
             return result;
         } catch (SQLException ex) {
-            throw new CuikInternalException(String.format("SQL Exception: %s", ex.getMessage()), ex);
+            throw new CuikInternalException(
+                String.format("SQL Exception: %s", ex.getMessage()),
+                ex
+            );
         } catch (Exception ex) {
-            throw new CuikInternalException(String.format("Unexpected exception: %s", ex.getMessage()), ex);
+            throw new CuikInternalException(
+                String.format("Unexpected exception: %s", ex.getMessage()),
+                ex
+            );
         }
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> query(Class<T> classT, String query, Object... parameters) throws CuikInternalException {
+    public <T> List<T> query(
+        Class<T> classT,
+        String query,
+        Object... parameters
+    ) throws CuikInternalException {
         try {
             var connection = connect();
             var constructor = getConstructor(classT);
@@ -104,26 +129,45 @@ public class SqlClient {
 
             return results;
         } catch (SQLException ex) {
-            throw new CuikInternalException(String.format("SQL Exception: %s", ex.getMessage()), ex);
+            throw new CuikInternalException(
+                String.format("SQL Exception: %s", ex.getMessage()),
+                ex
+            );
         } catch (Exception ex) {
-            throw new CuikInternalException(String.format("Unexpected exception: %s", ex.getMessage()), ex);
+            throw new CuikInternalException(
+                String.format("Unexpected exception: %s", ex.getMessage()),
+                ex
+            );
         }
     }
 
-    public void exec(String query, Object... parameters) throws CuikInternalException {
+    public void exec(String query, Object... parameters)
+        throws CuikInternalException {
         try {
             prepareStatement(connect(), query, parameters).execute();
         } catch (SQLException ex) {
-            throw new CuikInternalException(String.format("SQL Exception: %s", ex.getMessage()), ex);
+            throw new CuikInternalException(
+                String.format("SQL Exception: %s", ex.getMessage()),
+                ex
+            );
         }
     }
 
-    public <T> T read(Class<T> classT, String table, UUID id) throws CuikInternalException, SQLException {
-        return querySingle(classT, String.format("SELECT * FROM %s WHERE id = ?", table), id.toString());
+    public <T> T read(Class<T> classT, String table, UUID id)
+        throws CuikInternalException, SQLException {
+        return querySingle(
+            classT,
+            String.format("SELECT * FROM %s WHERE id = ?", table),
+            id.toString()
+        );
     }
 
     public <T> T readBy(Class<T> classT, String table, String key, String value)
-            throws CuikInternalException, SQLException {
-        return querySingle(classT, String.format("SELECT * FROM %s WHERE %s = ?", table, key), value);
+        throws CuikInternalException, SQLException {
+        return querySingle(
+            classT,
+            String.format("SELECT * FROM %s WHERE %s = ?", table, key),
+            value
+        );
     }
 }

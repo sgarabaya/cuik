@@ -1,5 +1,3 @@
 package cuik.adapters;
 
-public class EmployeeAdapter {
-
-}
+public class EmployeeAdapter {}

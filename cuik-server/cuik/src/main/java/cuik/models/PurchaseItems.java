@@ -5,12 +5,12 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class PurchaseItems extends BaseEntity {
+
     public UUID menuItemId;
     public double price;
     public double units;
 
-    public PurchaseItems() {
-    }
+    public PurchaseItems() {}
 
     public PurchaseItems(ResultSet resultSet) throws SQLException {
         super(resultSet);

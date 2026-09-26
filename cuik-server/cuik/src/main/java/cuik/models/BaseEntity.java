@@ -1,19 +1,18 @@
 package cuik.models;
 
+import cuik.adapters.sql.Mappable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import cuik.adapters.sql.Mappable;
-
 public abstract class BaseEntity extends Mappable {
+
     public UUID id;
     public LocalDateTime created;
     public LocalDateTime updated;
 
-    public BaseEntity() {
-    }
+    public BaseEntity() {}
 
     public BaseEntity(ResultSet resultSet) throws SQLException {
         super(resultSet);

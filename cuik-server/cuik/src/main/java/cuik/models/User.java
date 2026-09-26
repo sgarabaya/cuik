@@ -4,12 +4,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class User extends BaseEntity {
+
     public String name;
     public String email;
     public String passwordHash;
 
-    public User() {
-    }
+    public User() {}
 
     public User(ResultSet resultSet) throws SQLException {
         super(resultSet);
