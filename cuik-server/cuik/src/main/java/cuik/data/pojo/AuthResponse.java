@@ -1,3 +1,3 @@
-package cuik.models.pojo;
+package cuik.data.pojo;
 
 public record AuthResponse(String token) {}

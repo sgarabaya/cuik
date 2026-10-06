@@ -1,27 +1,28 @@
 package cuik.controllers;
 
-import cuik.adapters.UserAdapter;
-import cuik.models.User;
+import cuik.data.UserRepository;
+import cuik.data.models.User;
 import cuik.server.annotations.*;
 import java.util.List;
+import java.util.UUID;
 
 @Controller("/api/users")
 public class UserController {
 
-    private final UserAdapter adapter;
+    private final UserRepository repository;
 
-    public UserController(UserAdapter adapter) {
-        this.adapter = adapter;
+    public UserController(UserRepository repository) {
+        this.repository = repository;
     }
 
     @Get
-    public List<User> getUsers() {
-        return adapter.getAll();
+    public List<User> getUsers() throws Exception {
+        return repository.fetch();
     }
 
     @Get("{id}")
-    public User getUserById(String id) {
-        return adapter.getById(id);
+    public User getUserById(String id) throws Exception {
+        return repository.findById(UUID.fromString(id));
     }
 
     @Post

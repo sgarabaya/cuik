@@ -59,4 +59,8 @@ public abstract class Configuration {
     public static String getJwtSecret() {
         return get("JWT_SECRET");
     }
+
+    public static String getStaticDir() {
+        return get("WWW_DIR");
+    }
 }

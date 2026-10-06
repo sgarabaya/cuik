@@ -1,4 +1,4 @@
-package cuik.adapters.sql;
+package cuik.data;
 
 import cuik.utilities.Configuration;
 import cuik.utilities.CuikInternalException;
@@ -74,7 +74,6 @@ public class SqlClient {
         return statement;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T querySingle(
         Class<T> classT,
         String query,
@@ -88,9 +87,9 @@ public class SqlClient {
 
             T result = null;
 
-            if (resultSet.next()) result = (T) constructor.newInstance(
-                resultSet
-            );
+            if (resultSet.next()) {
+                result = classT.cast(constructor.newInstance(resultSet));
+            }
 
             connection.close();
 
@@ -108,7 +107,6 @@ public class SqlClient {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T> List<T> query(
         Class<T> classT,
         String query,
@@ -123,7 +121,7 @@ public class SqlClient {
             var results = new ArrayList<T>();
 
             while (resultSet.next())
-                results.add((T) constructor.newInstance(resultSet));
+                results.add(classT.cast(constructor.newInstance(resultSet)));
 
             connection.close();
 

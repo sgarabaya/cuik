@@ -7,17 +7,17 @@ plugins {
 
 repositories {
     mavenCentral()
-    // maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
+    //libs
     implementation ("com.auth0:java-jwt:4.6.1")
     implementation("com.mysql:mysql-connector-j:26.7.0")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("org.slf4j:slf4j-simple:2.0.16")
     implementation("org.eclipse.jetty:jetty-server:12.0.12")
-    // implementation("org.eclipse.jetty.websocket:jetty-websocket-jetty-server:12.0.12")
     implementation("de.mkammerer:argon2-jvm:2.12")
+    implementation("org.freemarker:freemarker:2.3.35")
 }
 
 tasks.withType<JavaCompile> {
@@ -27,6 +27,16 @@ tasks.withType<JavaCompile> {
 tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "cuik.App"
+    }
+}
+
+eclipse {
+    jdt {
+        file {
+            withProperties {
+                setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
+            }
+        }
     }
 }
 

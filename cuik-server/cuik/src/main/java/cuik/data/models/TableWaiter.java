@@ -1,4 +1,4 @@
-package cuik.models;
+package cuik.data.models;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,41 +1,66 @@
 package cuik.controllers;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import cuik.models.pojo.AuthRequest;
-import cuik.models.pojo.AuthResponse;
-import cuik.models.pojo.RegisterRequest;
-import cuik.models.pojo.RegisterResponse;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import cuik.data.UserRepository;
+import cuik.data.models.User;
+import cuik.data.pojo.AuthRequest;
+import cuik.data.pojo.RegisterRequest;
+import cuik.data.pojo.RegisterResponse;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Post;
-import cuik.services.AuthService;
+import cuik.utilities.Configuration;
+import cuik.utilities.Crypto;
+import java.util.UUID;
 
 @Controller("/api/auth")
 public class AuthController {
-    private final Logger logger = Logger.getLogger("AuthController");
-    private final AuthService service;
 
-    public AuthController(AuthService service) {
-        this.service = service;
+    private final UserRepository repository;
+
+    public AuthController(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    private String authenticate(User user, String password) throws Exception {
+        if (Crypto.verify(user.getPasswordHash(), password)) {
+            var algorithm = Algorithm.HMAC512(Configuration.getJwtSecret());
+            return JWT.create().sign(algorithm);
+        }
+
+        return null;
     }
 
     @Post("login")
-    public AuthResponse login(@FromBody AuthRequest request) {
-        try {
-            var token = service.authenticateUser(request.name(), request.password());
-            return new AuthResponse(token);
-        } catch (Exception ex) {
-            logger.log(Level.SEVERE, "", ex);
-            return null;
-        }
+    public String login(@FromBody AuthRequest request) throws Exception {
+        var name = request.name();
+        var password = request.password();
+
+        var user = repository.findByName(name);
+
+        if (user == null) return null; // El usuario no existe
+
+        return authenticate(user, password);
     }
 
     @Post("register")
-    public RegisterResponse register(@FromBody RegisterRequest request) {
-        var registered = service.registerUser(request.name(), request.email(), request.password());
+    public RegisterResponse register(@FromBody RegisterRequest request)
+        throws Exception {
+        var user = repository.findByEmail(request.email());
 
-        return new RegisterResponse(registered.a().id.toString(), registered.b());
+        if (user != null) return null; // El usuario ya existe
+
+        user = new User();
+        user.setId(UUID.randomUUID());
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setPasswordHash(Crypto.hash(request.password()));
+
+        repository.create(user);
+
+        var token = authenticate(user, request.password());
+
+        return new RegisterResponse(user.getId(), token);
     }
 }

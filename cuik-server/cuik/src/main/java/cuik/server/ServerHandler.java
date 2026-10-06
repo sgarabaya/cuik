@@ -58,7 +58,6 @@ public class ServerHandler extends Handler.Abstract {
         );
 
         route.handler().func(context);
-
         return true;
     }
 }

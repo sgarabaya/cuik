@@ -41,7 +41,7 @@ public class HttpContext {
         return request.getMethod();
     }
 
-    public String getFullPath() {
+    public String getPath() {
         return request.getHttpURI().toString();
     }
 
@@ -73,13 +73,16 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (
-            request.getLength() >
-            10 * 1024 * 1024 // if the content-length is >10M, reject it
-        ) return null;
+        if (request.getLength() > 10 * 1024 * 1024 // if the content-length is >10M, reject it
+        )
+            return null;
 
         var buffer = Content.Source.asByteBuffer(request).array();
         return Transform.fromJson(buffer, classT);
+    }
+
+    public void setContentType(String contentType) {
+        response.getHeaders().put("Content-Type", contentType);
     }
 
     // Respond with an error
@@ -88,7 +91,7 @@ public class HttpContext {
         var pStream = new PrintStream(stream);
         ex.printStackTrace(pStream);
 
-        response.getHeaders().put("Content-Type", "application/json");
+        setContentType("application/json");
         response.setStatus(500);
         response.write(true, ByteBuffer.wrap(stream.toByteArray()), callback);
     }
@@ -100,13 +103,18 @@ public class HttpContext {
             response.setStatus(204);
             response.write(true, ByteBuffer.allocate(0), callback);
         } else {
-            response.getHeaders().put("Content-Type", "application/json");
+            setContentType("application/json");
             response.setStatus(200);
             response.write(
-                true,
-                ByteBuffer.wrap(Transform.toJsonBytes(obj)),
-                callback
-            );
+                    true,
+                    ByteBuffer.wrap(Transform.toJsonBytes(obj)),
+                    callback);
         }
+    }
+
+    public void respond(byte[] bytes, String mimeType) {
+        setContentType(mimeType);
+        response.setStatus(200);
+        response.write(true, ByteBuffer.wrap(bytes), callback);
     }
 }
