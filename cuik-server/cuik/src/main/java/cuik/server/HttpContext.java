@@ -73,9 +73,10 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (request.getLength() > 10 * 1024 * 1024 // if the content-length is >10M, reject it
-        )
-            return null;
+        if (
+            request.getLength() >
+            10 * 1024 * 1024 // if the content-length is >10M, reject it
+        ) return null;
 
         var buffer = Content.Source.asByteBuffer(request).array();
         return Transform.fromJson(buffer, classT);
@@ -96,6 +97,16 @@ public class HttpContext {
         response.write(true, ByteBuffer.wrap(stream.toByteArray()), callback);
     }
 
+    public void respondView(String view) {
+        setContentType("text/html");
+        response.setStatus(200);
+        response.write(
+            true,
+            ByteBuffer.wrap(Transform.toBytes(view)),
+            callback
+        );
+    }
+
     // Respond with the object
     // TODO: Consider: Content.Sink.write(response, true, payload, callback);
     public <T> void respond(T obj) {
@@ -106,9 +117,10 @@ public class HttpContext {
             setContentType("application/json");
             response.setStatus(200);
             response.write(
-                    true,
-                    ByteBuffer.wrap(Transform.toJsonBytes(obj)),
-                    callback);
+                true,
+                ByteBuffer.wrap(Transform.toJsonBytes(obj)),
+                callback
+            );
         }
     }
 

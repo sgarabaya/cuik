@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `Users` (
     `password_hash` VARCHAR(512) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS `Employee` (
+CREATE TABLE IF NOT EXISTS `Employees` (
     `id` VARCHAR(36) PRIMARY KEY,
     `created` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `Employee` (
     `isAdmin` BIT DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS `Menu` (
+CREATE TABLE IF NOT EXISTS `Menus` (
     `id`          VARCHAR(36) PRIMARY KEY,
     `created`     DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated`     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -36,27 +36,28 @@ CREATE TABLE IF NOT EXISTS `Menu` (
     `is_active`   BIT DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS `MenuItem` (
+CREATE TABLE IF NOT EXISTS `MenuItems` (
     `id`                   VARCHAR(36) PRIMARY KEY,
     `menu_id`              VARCHAR(36) NOT NULL,
     `name`                 VARCHAR(40) NOT NULL,
+    `category`             VARCHAR(64),
     `description`          TEXT,
     `price`                DECIMAL(10,2) NOT NULL,
     `available`            BIT DEFAULT 1,
-    `prep_time_estimation` INT,
+    `estimated_prep_time`   INT,
 
-    FOREIGN KEY (`menu_id`) REFERENCES `Menu`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`menu_id`) REFERENCES `Menus`(`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `MenuItemImage` (
+CREATE TABLE IF NOT EXISTS `MenuItemImages` (
     `id`           VARCHAR(36) PRIMARY KEY,
     `menu_item_id` VARCHAR(36) NOT NULL,
     `url`          VARCHAR(2048) NOT NULL,
 
-    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItem`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems`(`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS `NutritionalFact` (
+CREATE TABLE IF NOT EXISTS `NutritionalFacts` (
     `id`             VARCHAR(36) PRIMARY KEY,
     `menu_item_id`   VARCHAR(36) NOT NULL,
     `description`    TEXT NOT NULL,
@@ -67,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `NutritionalFact` (
     `is_vegan`       BIT DEFAULT 0,
     `is_gluten_free` BIT DEFAULT 0,
 
-    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItem`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems`(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `Allergens` (
@@ -81,14 +82,14 @@ CREATE TABLE IF NOT EXISTS `MenuItemAllergens` (
     `allergen_id`  VARCHAR(36) NOT NULL,
 
     PRIMARY KEY (`menu_item_id`, `allergen_id`),
-    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItem`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems`(`id`) ON DELETE CASCADE,
     FOREIGN KEY (`allergen_id`)  REFERENCES `Allergens`(`id`) ON DELETE RESTRICT
 );
 
 /*
 Insert test records:
 */
-INSERT IGNORE INTO `Employee`
+INSERT IGNORE INTO `Employees`
     (`id`,`name`,`email`,`password_hash`,`isAdmin`)
 VALUES
     (

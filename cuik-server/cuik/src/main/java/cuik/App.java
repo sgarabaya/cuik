@@ -1,7 +1,11 @@
 package cuik;
 
 import cuik.controllers.AuthController;
+import cuik.controllers.MenuController;
 import cuik.controllers.UserController;
+import cuik.controllers.ViewsController;
+import cuik.data.MenuItemRepository;
+import cuik.data.MenuRepository;
 import cuik.data.SqlClient;
 import cuik.data.UserRepository;
 import cuik.server.ServerBuilder;
@@ -20,8 +24,10 @@ public class App {
 
         var server = new ServerBuilder()
             .usePort(8080)
+            .useController(ViewsController.class)
             .useController(UserController.class)
             .useController(AuthController.class)
+            .useController(MenuController.class)
             .useStaticFiles(Configuration.getStaticDir())
             .build();
 
@@ -52,9 +58,13 @@ public class App {
 
         //repos
         Container.register(UserRepository.class);
+        Container.register(MenuRepository.class);
+        Container.register(MenuItemRepository.class);
 
         //controllers
+        Container.register(ViewsController.class);
         Container.register(AuthController.class);
         Container.register(UserController.class);
+        Container.register(MenuController.class);
     }
 }

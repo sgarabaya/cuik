@@ -1,14 +1,18 @@
 package cuik.utilities;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
 
 public abstract class Transform {
 
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+        .create();
 
     public static String fromBytes(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);

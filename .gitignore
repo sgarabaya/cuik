@@ -1,6 +1,5 @@
 .docker-pull
 
-.zed
 .idea
 .vscode
 .gradle

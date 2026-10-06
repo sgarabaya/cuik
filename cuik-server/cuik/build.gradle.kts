@@ -49,10 +49,10 @@ java {
 tasks.shadowJar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
-    minimize {
-        exclude(dependency("org.slf4j:.*:.*"))
-        exclude(dependency("com.mysql:mysql-connector-j:.*"))
-    }
+    // minimize {
+    //     exclude(dependency("org.slf4j:.*:.*"))
+    //     exclude(dependency("com.mysql:mysql-connector-j:.*"))
+    // }
     mergeServiceFiles()
     archiveFileName = "cuik.jar"
     destinationDirectory = File("$rootDir/")

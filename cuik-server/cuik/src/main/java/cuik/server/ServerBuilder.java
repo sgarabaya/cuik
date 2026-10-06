@@ -4,10 +4,12 @@ import cuik.server.annotations.Controller;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Get;
 import cuik.server.annotations.Post;
+import cuik.server.annotations.View;
 import cuik.server.router.RouteHandler;
 import cuik.server.router.Router;
 import cuik.utilities.Container;
 import cuik.utilities.CuikInternalException;
+import cuik.utilities.Strings;
 import cuik.utilities.Tuple3;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -65,7 +67,7 @@ public class ServerBuilder {
             }
 
             var postAnnotation = method.getAnnotation(Post.class);
-            if (method.isAnnotationPresent(Post.class)) {
+            if (postAnnotation != null) {
                 var path = concatPaths(base, postAnnotation.value());
                 router.addRoute("POST", path, handler);
                 logger.log(
@@ -73,6 +75,25 @@ public class ServerBuilder {
                     String.format(
                         "Registered [%s] %s to %s::%s",
                         "POST",
+                        path,
+                        controller.getName(),
+                        method.getName()
+                    )
+                );
+            }
+
+            var viewAnnotation = method.getAnnotation(View.class);
+            if (viewAnnotation != null) {
+                var path = concatPaths(
+                    base,
+                    Strings.emptyOr(viewAnnotation.value(), "/")
+                );
+                router.addRoute("GET", path, handler);
+                logger.log(
+                    Level.INFO,
+                    String.format(
+                        "Registered VIEW [%s] %s to %s::%s",
+                        "GET",
                         path,
                         controller.getName(),
                         method.getName()
@@ -121,6 +142,9 @@ public class ServerBuilder {
             }
         }
 
+        //si tenemos esta anotacion, es una vista
+        var isView = method.isAnnotationPresent(View.class);
+
         RouteHandler handler = (HttpContext context) -> {
             try {
                 context.logger.log(
@@ -153,7 +177,13 @@ public class ServerBuilder {
                     }
                 }
 
-                context.respond(method.invoke(ctl, paramValues));
+                if (isView) {
+                    context.respondView(
+                        (String) method.invoke(ctl, paramValues)
+                    );
+                } else {
+                    context.respond(method.invoke(ctl, paramValues));
+                }
             } catch (Exception ex) {
                 context.logger.log(Level.SEVERE, "Execution failure", ex);
                 context.respond(ex.getMessage());

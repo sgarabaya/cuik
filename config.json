@@ -1,6 +1,6 @@
 {
-    "DB_CONNECTION_STRING": "jdbc:mysql://localhost:3306/cuik",
-    "DB_USER": "root",
-    "DB_PWD": "root",
-    "JWT_SECRET": "es.muy.secreto"
+  "DB_CONNECTION_STRING": "jdbc:mysql://localhost:3306/cuik",
+  "DB_USER": "root",
+  "DB_PWD": "root",
+  "JWT_SECRET": "es.muy.secreto"
 }

@@ -14,7 +14,12 @@ public abstract class Configuration {
 
     public static void loadConfig() throws Exception {
         if (configValues == null) {
-            var configFile = new File("./config.json");
+            var configFile = new File(
+                Strings.emptyOr(
+                    System.getProperty("CONFIG_FILE"),
+                    "./config.json"
+                )
+            );
 
             if (configFile.exists()) {
                 var input = new FileInputStream(configFile);
