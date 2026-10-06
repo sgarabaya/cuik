@@ -1,6 +1,7 @@
 package cuik.utilities;
 
 public class ContainerException extends RuntimeException {
+
     public ContainerException(String message) {
         super(message);
     }
@@ -13,8 +14,12 @@ public class ContainerException extends RuntimeException {
         super(cause);
     }
 
-    protected ContainerException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+    protected ContainerException(
+        String message,
+        Throwable cause,
+        boolean enableSuppression,
+        boolean writableStackTrace
+    ) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

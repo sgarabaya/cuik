@@ -1,5 +1,6 @@
 .docker-pull
 
+.zed
 .idea
 .vscode
 .gradle
@@ -7,6 +8,8 @@
 build/
 bin/
 .kotlin
-.local
+.classpath
+.project
+.settings
 
 node_modules

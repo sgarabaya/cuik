@@ -1,12 +1,13 @@
 package cuik.utilities;
 
+import com.google.gson.Gson;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 
-import com.google.gson.Gson;
-
 public abstract class Transform {
+
     private static final Gson gson = new Gson();
 
     public static String fromBytes(byte[] bytes) {
@@ -31,6 +32,14 @@ public abstract class Transform {
 
     public static <T> byte[] toJsonBytes(T object) {
         return toBytes(toJson(object));
+    }
+
+    public static String toBase64(byte[] bytes) {
+        return fromBytes(Base64.getEncoder().encode(bytes));
+    }
+
+    public static byte[] fromBase64(String encoded) {
+        return Base64.getDecoder().decode(encoded);
     }
 
     public static UUID bytesToUUID(byte[] bytes) {

@@ -1,6 +1,7 @@
 package cuik.utilities;
 
 public class CuikInternalException extends Exception {
+
     public CuikInternalException(String message) {
         super(message);
     }

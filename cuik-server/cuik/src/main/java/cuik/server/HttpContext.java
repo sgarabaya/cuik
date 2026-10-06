@@ -1,20 +1,19 @@
 package cuik.server;
 
+import cuik.utilities.Transform;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
-import cuik.utilities.Transform;
-
 public class HttpContext {
+
     private final Request request;
     private final Response response;
     private final Callback callback;
@@ -22,8 +21,13 @@ public class HttpContext {
 
     public final Logger logger;
 
-    public HttpContext(Logger logger, Request request, Response response, Callback callback,
-            Map<String, String> params) {
+    public HttpContext(
+        Logger logger,
+        Request request,
+        Response response,
+        Callback callback,
+        Map<String, String> params
+    ) {
         this.logger = logger;
         this.request = request;
         this.response = response;
@@ -37,7 +41,7 @@ public class HttpContext {
         return request.getMethod();
     }
 
-    public String getFullPath() {
+    public String getPath() {
         return request.getHttpURI().toString();
     }
 
@@ -69,11 +73,16 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (request.getLength() > 10 * 1024 * 1024) // if the content-length is >10M, reject it
+        if (request.getLength() > 10 * 1024 * 1024 // if the content-length is >10M, reject it
+        )
             return null;
 
         var buffer = Content.Source.asByteBuffer(request).array();
         return Transform.fromJson(buffer, classT);
+    }
+
+    public void setContentType(String contentType) {
+        response.getHeaders().put("Content-Type", contentType);
     }
 
     // Respond with an error
@@ -82,7 +91,7 @@ public class HttpContext {
         var pStream = new PrintStream(stream);
         ex.printStackTrace(pStream);
 
-        response.getHeaders().put("Content-Type", "application/json");
+        setContentType("application/json");
         response.setStatus(500);
         response.write(true, ByteBuffer.wrap(stream.toByteArray()), callback);
     }
@@ -94,9 +103,18 @@ public class HttpContext {
             response.setStatus(204);
             response.write(true, ByteBuffer.allocate(0), callback);
         } else {
-            response.getHeaders().put("Content-Type", "application/json");
+            setContentType("application/json");
             response.setStatus(200);
-            response.write(true, ByteBuffer.wrap(Transform.toJsonBytes(obj)), callback);
+            response.write(
+                    true,
+                    ByteBuffer.wrap(Transform.toJsonBytes(obj)),
+                    callback);
         }
+    }
+
+    public void respond(byte[] bytes, String mimeType) {
+        setContentType(mimeType);
+        response.setStatus(200);
+        response.write(true, ByteBuffer.wrap(bytes), callback);
     }
 }

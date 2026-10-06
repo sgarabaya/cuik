@@ -16,6 +16,6 @@ RUN apk add openjdk25-jre
 
 COPY --from=builder cuik.jar .
 
-EXPOSE 8080 8080
+EXPOSE 8080
 
 CMD java -jar cuik.jar

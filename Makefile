@@ -13,35 +13,24 @@ clean-server:
 	gradle -p cuik-server clean
 
 .docker-pull:
-	docker pull lscr.io/linuxserver/mariadb:latest
+	docker pull mysql:latest
 	touch .docker-pull
 
 tag:
 	docker build -t cuik-server:$(version) cuik-server
 
-db: .docker-pull
-	docker run -d \
-		--name=mariadb \
-		-e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC \
-		-e MYSQL_ROOT_PASSWORD="pwd_root" \
-		-e MYSQL_USER="user1" \
-		-e MYSQL_PASSWORD="pwd1" \
-		-p 3306:3306 \
-		-v ./.local:/config \
-		lscr.io/linuxserver/mariadb:latest
+db-client:
+	docker exec -it cuik-foods-db-1 mysql -u root -p
 
-	@sleep 1 # dormimos un cachin para que Docker termine de armar el container
-	docker exec -i mariadb mariadb < db.sql
+db: .docker-pull
+	docker compose down && docker compose up -d
 
 clean-db:
-	docker stop mariadb
-	docker rm mariadb
-	rm -rf .docker-pull .local
+	docker compose down
+	rm -rf .docker-pull
 
 bin:
 	@mkdir -p bin
 
-# specifically do not touch the db
-clean: clean-server
+clean: clean-server clean-db
 	rm -rf bin
-	@echo "[!] Did not clean the db. Run \`make clean-db\` if you need to do so"
