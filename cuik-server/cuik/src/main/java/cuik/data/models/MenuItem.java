@@ -21,7 +21,7 @@ public class MenuItem extends BaseEntity {
     private boolean available;
 
     @Column("estimated_prep_time")
-    private String estimatedPrepTime;
+    private int estimatedPrepTime;
 
     public UUID getMenuId() {
         return menuId;
@@ -63,11 +63,11 @@ public class MenuItem extends BaseEntity {
         this.available = available;
     }
 
-    public String getEstimatedPrepTime() {
+    public int getEstimatedPrepTime() {
         return estimatedPrepTime;
     }
 
-    public void setEstimatedPrepTime(String estimatedPrepTime) {
+    public void setEstimatedPrepTime(int estimatedPrepTime) {
         this.estimatedPrepTime = estimatedPrepTime;
     }
 }
