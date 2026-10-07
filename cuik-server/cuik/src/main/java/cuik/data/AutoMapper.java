@@ -33,6 +33,25 @@ public abstract class AutoMapper {
             .toList();
     }
 
+    private static List<FieldInfo> getTypeColumns(Class<?> classT) {
+        var columns = new ArrayList<FieldInfo>();
+        for (var field : classT.getDeclaredFields()) {
+            var column = field.getAnnotation(Column.class);
+            if (column == null) continue;
+            var columnName = Strings.emptyOr(column.value(), field.getName());
+
+            field.setAccessible(true);
+            columns.add(
+                new FieldInfo(
+                    columnName,
+                    field,
+                    field.getType().getSimpleName()
+                )
+            );
+        }
+        return columns;
+    }
+
     private static TypeInfo getTypeInfo(Class<?> classT)
         throws CuikInternalException {
         if (_typeCache.containsKey(classT)) {
@@ -50,20 +69,11 @@ public abstract class AutoMapper {
             )
         );
 
+        var currentClass = classT;
         var columns = new ArrayList<FieldInfo>();
-        for (var field : classT.getDeclaredFields()) {
-            var column = field.getAnnotation(Column.class);
-            if (column == null) continue;
-            var columnName = Strings.emptyOr(column.value(), field.getName());
-
-            field.setAccessible(true);
-            columns.add(
-                new FieldInfo(
-                    columnName,
-                    field,
-                    field.getType().getSimpleName()
-                )
-            );
+        while (currentClass != null && currentClass != Object.class) {
+            columns.addAll(getTypeColumns(currentClass));
+            currentClass = currentClass.getSuperclass();
         }
 
         var typeInfo = new TypeInfo(constructor.get(), columns);

@@ -12,6 +12,7 @@ public abstract class Transform {
 
     private static final Gson gson = new GsonBuilder()
         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+        .registerTypeAdapterFactory(new HierarchyOrderTypeAdapterFactory())
         .create();
 
     public static String fromBytes(byte[] bytes) {
