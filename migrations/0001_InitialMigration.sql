@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `MenuItemImages` (
 
 CREATE TABLE IF NOT EXISTS `NutritionalFacts` (
     `id` VARCHAR(36) PRIMARY KEY,
-    `menu_item_id` VARCHAR(36) NOT NULL,
+    `menu_item_id` VARCHAR(36) UNIQUE NOT NULL,
     `description` TEXT NOT NULL,
     `portion` FLOAT NOT NULL,
     `calories` FLOAT NOT NULL,

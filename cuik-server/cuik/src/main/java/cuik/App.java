@@ -1,5 +1,6 @@
 package cuik;
 
+import cuik.adapters.MenuAdapter;
 import cuik.controllers.AuthController;
 import cuik.controllers.MenuController;
 import cuik.controllers.UserController;
@@ -23,21 +24,20 @@ public class App {
         setupCleanupThread();
 
         var server = new ServerBuilder()
-            .usePort(8080)
-            .useController(ViewsController.class)
-            .useController(UserController.class)
-            .useController(AuthController.class)
-            .useController(MenuController.class)
-            .useStaticFiles(Configuration.getStaticDir())
-            .build();
+                .usePort(8080)
+                .useController(ViewsController.class)
+                .useController(UserController.class)
+                .useController(AuthController.class)
+                .useController(MenuController.class)
+                .useStaticFiles("/static")
+                .build();
 
         server.start();
         System.out.println(
-            "\n**************************\n" +
-                "Server started!\n" +
-                "Listening @ localhost:8080" +
-                "\n**************************\n"
-        );
+                "\n**************************\n" +
+                        "Server started!\n" +
+                        "Listening @ localhost:8080" +
+                        "\n**************************\n");
         server.await();
     }
 
@@ -56,12 +56,15 @@ public class App {
     private static void initializeDependencies() {
         Container.register(SqlClient.class);
 
-        //repos
+        // repos
         Container.register(UserRepository.class);
         Container.register(MenuRepository.class);
         Container.register(MenuItemRepository.class);
 
-        //controllers
+        // adapters
+        Container.register(MenuAdapter.class);
+
+        // controllers
         Container.register(ViewsController.class);
         Container.register(AuthController.class);
         Container.register(UserController.class);

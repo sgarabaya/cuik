@@ -22,10 +22,10 @@ public class Router {
 
         var node = root;
         for (var part : route.parts()) {
-            if (!node.children.containsKey(part)) node.children.put(
-                part,
-                new RouteNode()
-            );
+            if (!node.children.containsKey(part))
+                node.children.put(
+                        part,
+                        new RouteNode());
             node = node.children.get(part);
         }
         node.route = route;
@@ -48,15 +48,15 @@ public class Router {
                 params.add(fragment);
                 node = node.children.get(RoutePart.wildcard);
             } else {
-                return null;
+                break;
             }
         }
 
         if (node == null || node.route == null) {
-            if (fallback != null) return new Tuple<>(
-                params,
-                new Route(null, null, fallback)
-            );
+            if (fallback != null)
+                return new Tuple<>(
+                        params,
+                        new Route(null, null, fallback));
             return null;
         }
 
@@ -64,9 +64,11 @@ public class Router {
     }
 
     private static String trimSlash(String path) {
-        if (path.startsWith("/")) path = path.substring(1);
+        if (path.startsWith("/"))
+            path = path.substring(1);
 
-        if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        if (path.endsWith("/"))
+            path = path.substring(0, path.length() - 1);
 
         return path;
     }

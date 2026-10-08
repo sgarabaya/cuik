@@ -1,5 +1,6 @@
 package cuik.server;
 
+import cuik.exceptions.CuikValidationException;
 import cuik.utilities.Transform;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,12 +23,11 @@ public class HttpContext {
     public final Logger logger;
 
     public HttpContext(
-        Logger logger,
-        Request request,
-        Response response,
-        Callback callback,
-        Map<String, String> params
-    ) {
+            Logger logger,
+            Request request,
+            Response response,
+            Callback callback,
+            Map<String, String> params) {
         this.logger = logger;
         this.request = request;
         this.response = response;
@@ -42,7 +42,7 @@ public class HttpContext {
     }
 
     public String getPath() {
-        return request.getHttpURI().toString();
+        return request.getHttpURI().getPath().toString();
     }
 
     private Map<String, String> getQueryParams() {
@@ -73,10 +73,9 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (
-            request.getLength() >
-            10 * 1024 * 1024 // if the content-length is >10M, reject it
-        ) return null;
+        if (request.getLength() > 10 * 1024 * 1024 // if the content-length is >10M, reject it
+        )
+            return null;
 
         var buffer = Content.Source.asByteBuffer(request).array();
         return Transform.fromJson(buffer, classT);
@@ -87,12 +86,12 @@ public class HttpContext {
     }
 
     // Respond with an error
-    public void respond(Exception ex) {
+    public void respondError(Throwable ex) {
         var stream = new ByteArrayOutputStream();
         var pStream = new PrintStream(stream);
         ex.printStackTrace(pStream);
 
-        setContentType("application/json");
+        // setContentType("application/json");
         response.setStatus(500);
         response.write(true, ByteBuffer.wrap(stream.toByteArray()), callback);
     }
@@ -101,27 +100,35 @@ public class HttpContext {
         setContentType("text/html");
         response.setStatus(200);
         response.write(
-            true,
-            ByteBuffer.wrap(Transform.toBytes(view)),
-            callback
-        );
+                true,
+                ByteBuffer.wrap(Transform.toBytes(view)),
+                callback);
     }
 
     // Respond with the object
     // TODO: Consider: Content.Sink.write(response, true, payload, callback);
     public <T> void respond(T obj) {
+        respond(obj, 200);
+    }
+
+    public <T> void respond(T obj, int status) {
         if (obj == null) {
             response.setStatus(204);
             response.write(true, ByteBuffer.allocate(0), callback);
         } else {
             setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(status);
             response.write(
-                true,
-                ByteBuffer.wrap(Transform.toJsonBytes(obj)),
-                callback
-            );
+                    true,
+                    ByteBuffer.wrap(Transform.toJsonBytes(obj)),
+                    callback);
         }
+    }
+
+    public void respondNotFound() {
+        response.setStatus(404);
+        setContentType("text/html");
+        response.write(true, ByteBuffer.wrap(Transform.toBytes("Not found")), callback);
     }
 
     public void respond(byte[] bytes, String mimeType) {

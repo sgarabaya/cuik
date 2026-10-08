@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,10 +23,9 @@ public abstract class Repository<T extends BaseEntity> {
     protected abstract String getTableName();
 
     protected PreparedStatement preparedStatement(
-        Connection conn,
-        String query,
-        Object... args
-    ) throws Exception {
+            Connection conn,
+            String query,
+            Object... args) throws Exception {
         var statement = conn.prepareStatement(query);
         for (var i = 0; i < args.length; i += 1) {
             switch (args[i].getClass().getSimpleName()) {
@@ -47,6 +47,9 @@ public abstract class Repository<T extends BaseEntity> {
                 case "String":
                     statement.setString(i + 1, (String) args[i]);
                     break;
+                case "UUID":
+                    statement.setString(i + 1, args[i].toString());
+                    break;
             }
         }
 
@@ -55,29 +58,31 @@ public abstract class Repository<T extends BaseEntity> {
 
     protected Connection connect() throws Exception {
         return DriverManager.getConnection(
-            Configuration.getConnectionString(),
-            Configuration.getDatabaseUser(),
-            Configuration.getDatabasePassword()
-        );
+                Configuration.getConnectionString(),
+                Configuration.getDatabaseUser(),
+                Configuration.getDatabasePassword());
     }
 
-    protected List<T> query(String query, Object... params) throws Exception {
+    protected <R> List<R> queryRaw(Class<R> classT, String query, Object... params) throws Exception {
         var conn = connect();
         try {
             var stmt = preparedStatement(conn, query, params);
 
-            var result = new ArrayList<T>();
+            var result = new ArrayList<R>();
 
             var rs = stmt.executeQuery();
             while (rs.next()) {
-                var obj = AutoMapper.map(getModelClass(), rs);
-                result.add(obj);
+                result.add(AutoMapper.map(classT, rs));
             }
 
             return result;
         } finally {
             conn.close();
         }
+    }
+
+    protected List<T> query(String query, Object... params) throws Exception {
+        return queryRaw(getModelClass(), query, params);
     }
 
     protected T querySingle(String query, Object... params) throws Exception {
@@ -106,9 +111,8 @@ public abstract class Repository<T extends BaseEntity> {
 
     public T findById(UUID id) throws Exception {
         var query = String.format(
-            "SELECT * FROM %s WHERE id = ?;",
-            getTableName()
-        );
+                "SELECT * FROM %s WHERE id = ?;",
+                getTableName());
 
         return querySingle(query, id.toString());
     }
@@ -118,28 +122,29 @@ public abstract class Repository<T extends BaseEntity> {
     }
 
     public boolean delete(UUID id) throws Exception {
-        return (
-            execute(
+        return (execute(
                 String.format("DELETE FROM %s WHERE id = ?;", getTableName()),
-                id.toString()
-            ) == 1
-        );
+                id.toString()) == 1);
     }
 
     public boolean create(T obj) throws Exception {
-        var columns = AutoMapper.getColumns(getModelClass()).stream();
-        var columnNames = String.join(
-            ",",
-            columns.map(c -> String.format("\"%s\"", c)).toList()
-        );
-        var values = String.join(",", columns.map(c -> "?").toList());
-        var query = String.format(
-            "INSERT INTO %s (%s) VALUES (%s)",
-            getTableName(),
-            columnNames,
-            values
-        );
+        var classColumns = AutoMapper.getColumns(getModelClass());
 
-        return execute(query) == 1;
+        var columns = new HashMap<String, Object>();
+
+        for (var column : classColumns) {
+            var field = column.field();
+            var value = field.getType().cast(field.get(obj));
+            if (value != null)
+                columns.put(column.name(), value);
+        }
+
+        var columnNames = String.join(",", columns.keySet().stream().map(k -> String.format("`%s`", k)).toList());
+        var valuePlaceholders = String.join(",", columns.keySet().stream().map(c -> "?").toList());
+        var query = String.format(
+                "INSERT INTO %s (%s) VALUES (%s)",
+                getTableName(), columnNames, valuePlaceholders);
+
+        return execute(query, columns.values().toArray()) == 1;
     }
 }

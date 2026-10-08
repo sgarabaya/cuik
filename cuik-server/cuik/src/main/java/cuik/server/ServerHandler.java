@@ -21,6 +21,9 @@ public class ServerHandler extends Handler.Abstract {
     private Map<String, String> mapParams(String[] keys, List<String> values) {
         var params = new HashMap<String, String>();
 
+        if (keys == null || values == null)
+            return params;
+
         for (int i = 0; i < keys.length; i += 1) {
             var value = i < values.size() ? values.get(i) : null;
             params.put(keys[i], value);
@@ -31,10 +34,9 @@ public class ServerHandler extends Handler.Abstract {
 
     @Override
     public boolean handle(
-        Request request,
-        Response response,
-        Callback callback
-    ) {
+            Request request,
+            Response response,
+            Callback callback) {
         var method = request.getMethod().toUpperCase();
         var path = request.getHttpURI().getPath();
 
@@ -50,12 +52,11 @@ public class ServerHandler extends Handler.Abstract {
         var logger = Logger.getLogger(String.format("[%s] %s", method, path));
 
         var context = new HttpContext(
-            logger,
-            request,
-            response,
-            callback,
-            params
-        );
+                logger,
+                request,
+                response,
+                callback,
+                params);
 
         route.handler().func(context);
         return true;

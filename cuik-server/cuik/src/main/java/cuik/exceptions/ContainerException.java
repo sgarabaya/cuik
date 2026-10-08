@@ -1,4 +1,4 @@
-package cuik.utilities;
+package cuik.exceptions;
 
 public class ContainerException extends RuntimeException {
 
@@ -15,11 +15,10 @@ public class ContainerException extends RuntimeException {
     }
 
     protected ContainerException(
-        String message,
-        Throwable cause,
-        boolean enableSuppression,
-        boolean writableStackTrace
-    ) {
+            String message,
+            Throwable cause,
+            boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

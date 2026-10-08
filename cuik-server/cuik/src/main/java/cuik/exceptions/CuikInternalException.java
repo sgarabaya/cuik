@@ -1,4 +1,4 @@
-package cuik.utilities;
+package cuik.exceptions;
 
 public class CuikInternalException extends Exception {
 

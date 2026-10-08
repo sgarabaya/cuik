@@ -21,3 +21,8 @@ En lineas generales, los componentes del proyecto seran:
     - Elegir que items uno consumio ( o decidir por que va a pagar )
     - Elegir % de propina
     - Pagar
+
+TODOs:
+ - Hacer que los statements devuelvan el ID de entidades creadas
+ - Investigar fuzzy search en mysql, ordenar por relevancia
+ 

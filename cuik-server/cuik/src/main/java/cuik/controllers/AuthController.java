@@ -7,6 +7,7 @@ import cuik.data.models.User;
 import cuik.data.pojo.AuthRequest;
 import cuik.data.pojo.RegisterRequest;
 import cuik.data.pojo.RegisterResponse;
+import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Post;
@@ -16,7 +17,6 @@ import java.util.UUID;
 
 @Controller("/api/auth")
 public class AuthController {
-
     private final UserRepository repository;
 
     public AuthController(UserRepository repository) {
@@ -39,17 +39,19 @@ public class AuthController {
 
         var user = repository.findByName(name);
 
-        if (user == null) return null; // El usuario no existe
+        if (user == null) // el usuario no existe
+            throw new CuikValidationException("El usuario no esta registrado");
 
         return authenticate(user, password);
     }
 
     @Post("register")
     public RegisterResponse register(@FromBody RegisterRequest request)
-        throws Exception {
+            throws Exception {
         var user = repository.findByEmail(request.email());
 
-        if (user != null) return null; // El usuario ya existe
+        if (user != null) // el usuario ya esta registrado
+            throw new CuikValidationException("El usuario ya esta registrado");
 
         user = new User();
         user.setId(UUID.randomUUID());

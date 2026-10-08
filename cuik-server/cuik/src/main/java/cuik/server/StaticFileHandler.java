@@ -2,18 +2,24 @@ package cuik.server;
 
 import cuik.server.router.RouteHandler;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class StaticFileHandler implements RouteHandler {
 
-    private final Path basePath;
+    private final String baseResourcePath;
     private final Map<String, String> mimeTypes;
 
-    public StaticFileHandler(Path basePath) {
-        this.basePath = basePath;
+    public StaticFileHandler(String baseResourcePath) {
+        if (!baseResourcePath.startsWith("/")) {
+            baseResourcePath = "/" + baseResourcePath;
+        }
+        if (baseResourcePath.endsWith("/")) {
+            baseResourcePath = baseResourcePath.substring(0, baseResourcePath.length() - 1);
+        }
+        this.baseResourcePath = baseResourcePath;
+
         this.mimeTypes = new HashMap<String, String>();
         mimeTypes.put("html", "text/html");
         mimeTypes.put("css", "text/css");
@@ -29,50 +35,55 @@ public class StaticFileHandler implements RouteHandler {
     public void func(HttpContext context) {
         var requestPath = context.getPath();
 
-        var filePath = basePath.resolve(requestPath).normalize();
-
-        if (!filePath.startsWith(basePath)) {
+        if (requestPath.contains("..")) {
             context.logger.warning(
-                "Potential directory traversal attempt blocked: " + requestPath
-            );
-            context.respond(null); //TODO: Send 404
+                    "Potential directory traversal attempt blocked: " + requestPath);
+            context.respondNotFound();
             return;
         }
 
-        var mimeType = determineMimeType(filePath);
+        if (!requestPath.startsWith("/")) {
+            requestPath = "/" + requestPath;
+        }
+
+        var fullResourcePath = baseResourcePath + requestPath;
+        var mimeType = determineMimeType(requestPath);
 
         if (mimeType == null) {
             context.logger.warning(
-                "Could not determine MIME type for file: " + filePath
-            );
+                    "Could not determine MIME type for file: " + requestPath);
             mimeType = "application/octet-stream";
         }
 
-        try {
-            var fileContent = Files.readAllBytes(filePath);
+        try (InputStream is = getClass().getResourceAsStream(fullResourcePath)) {
+            if (is == null) {
+                context.logger.warning("Resource not found: " + fullResourcePath);
+                context.respondNotFound();
+                return;
+            }
 
+            var fileContent = is.readAllBytes();
             context.respond(fileContent, mimeType);
+
         } catch (IOException e) {
             context.logger.severe(
-                "Error reading static file " + filePath + ": " + e.getMessage()
-            );
+                    "Error reading static resource " + fullResourcePath + ": " + e.getMessage());
             context.respond(
-                new RuntimeException("File not found or read error")
-            );
+                    new RuntimeException("Resource not found or read error"));
         }
     }
 
-    private String determineMimeType(Path filePath) {
-        var fileName = filePath.getFileName().toString();
-
-        if (fileName.isEmpty()) {
+    private String determineMimeType(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
             return "application/octet-stream";
         }
 
-        var extension = fileName
-            .substring(fileName.lastIndexOf('.') + 1)
-            .toLowerCase();
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1) {
+            return "application/octet-stream"; // No extension found
+        }
 
+        var extension = fileName.substring(lastDotIndex + 1).toLowerCase();
         return mimeTypes.get(extension);
     }
 }

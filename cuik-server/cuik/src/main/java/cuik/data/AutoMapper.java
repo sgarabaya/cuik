@@ -1,6 +1,6 @@
 package cuik.data;
 
-import cuik.utilities.CuikInternalException;
+import cuik.exceptions.CuikInternalException;
 import cuik.utilities.Strings;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -25,13 +25,9 @@ public abstract class AutoMapper {
 
     private static Map<Class<?>, TypeInfo> _typeCache = new ConcurrentHashMap<>();
 
-    public static List<String> getColumns(Class<?> classT)
+    public static List<FieldInfo> getColumns(Class<?> classT)
             throws CuikInternalException {
-        return getTypeInfo(classT)
-                .fields()
-                .stream()
-                .map(f -> f.name())
-                .toList();
+        return getTypeInfo(classT).fields();
     }
 
     private static List<FieldInfo> getTypeColumns(Class<?> classT) {
