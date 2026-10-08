@@ -1,6 +1,5 @@
 package cuik.server;
 
-import cuik.exceptions.CuikValidationException;
 import cuik.utilities.Transform;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -90,23 +89,16 @@ public class HttpContext {
         var stream = new ByteArrayOutputStream();
         var pStream = new PrintStream(stream);
         ex.printStackTrace(pStream);
-
-        // setContentType("application/json");
         response.setStatus(500);
-        response.write(true, ByteBuffer.wrap(stream.toByteArray()), callback);
+        respond(stream.toByteArray());
     }
 
     public void respondView(String view) {
         setContentType("text/html");
         response.setStatus(200);
-        response.write(
-                true,
-                ByteBuffer.wrap(Transform.toBytes(view)),
-                callback);
+        respond(Transform.toBytes(view));
     }
 
-    // Respond with the object
-    // TODO: Consider: Content.Sink.write(response, true, payload, callback);
     public <T> void respond(T obj) {
         respond(obj, 200);
     }
@@ -114,26 +106,27 @@ public class HttpContext {
     public <T> void respond(T obj, int status) {
         if (obj == null) {
             response.setStatus(204);
-            response.write(true, ByteBuffer.allocate(0), callback);
+            respond(ByteBuffer.allocate(0));
         } else {
             setContentType("application/json");
             response.setStatus(status);
-            response.write(
-                    true,
-                    ByteBuffer.wrap(Transform.toJsonBytes(obj)),
-                    callback);
+            respond(Transform.toJsonBytes(obj));
         }
     }
 
     public void respondNotFound() {
         response.setStatus(404);
         setContentType("text/html");
-        response.write(true, ByteBuffer.wrap(Transform.toBytes("Not found")), callback);
+        respond(Transform.toBytes("Not found"));
     }
 
     public void respond(byte[] bytes, String mimeType) {
         setContentType(mimeType);
         response.setStatus(200);
+        respond(bytes);
+    }
+
+    private void respond(byte[] bytes) {
         response.write(true, ByteBuffer.wrap(bytes), callback);
     }
 }
