@@ -1,16 +1,20 @@
 package cuik.server;
 
-import cuik.utilities.Transform;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.Callback;
+
+import cuik.utilities.Transform;
 
 public class HttpContext {
 
@@ -21,11 +25,7 @@ public class HttpContext {
 
     public final Logger logger;
 
-    public HttpContext(
-            Logger logger,
-            Request request,
-            Response response,
-            Callback callback,
+    public HttpContext(Logger logger, Request request, Response response, Callback callback,
             Map<String, String> params) {
         this.logger = logger;
         this.request = request;
@@ -72,12 +72,19 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (request.getLength() > 10 * 1024 * 1024 // if the content-length is >10M, reject it
-        )
-            return null;
+        if (request.getLength() > 10 * 1024 * 1024)
+            return null; // if the content-length is >10M, reject it
 
-        var buffer = Content.Source.asByteBuffer(request).array();
-        return Transform.fromJson(buffer, classT);
+        var json = Content.Source.asString(request, StandardCharsets.UTF_8);
+        return Transform.fromJson(json, classT);
+    }
+
+    public boolean hasSession() {
+        return this.request.getSession(false) != null;
+    }
+
+    public Session getSession() {
+        return this.request.getSession(true);
     }
 
     public void setContentType(String contentType) {

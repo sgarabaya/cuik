@@ -4,4 +4,6 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Delete {}
+public @interface Delete {
+    String value() default "";
+}

@@ -15,7 +15,7 @@ import java.io.StringWriter;
 import java.util.UUID;
 
 @Controller("/")
-public class ViewsController {
+public class ViewsController extends BaseController {
     private final Configuration viewCfg;
     private final MenuRepository menuRepository;
     private final MenuItemRepository menuItemRepository;

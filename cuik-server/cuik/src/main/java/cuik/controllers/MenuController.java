@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller("/api/menu")
-public class MenuController {
+public class MenuController extends BaseController {
     private final MenuAdapter menuAdapter;
 
     public MenuController(MenuAdapter menuAdapter) {

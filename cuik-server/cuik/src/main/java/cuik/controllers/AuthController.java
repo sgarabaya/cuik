@@ -16,7 +16,7 @@ import cuik.utilities.Crypto;
 import java.util.UUID;
 
 @Controller("/api/auth")
-public class AuthController {
+public class AuthController extends BaseController {
     private final UserRepository repository;
 
     public AuthController(UserRepository repository) {

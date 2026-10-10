@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller("/api/users")
-public class UserController {
+public class UserController extends BaseController {
 
     private final UserRepository repository;
 

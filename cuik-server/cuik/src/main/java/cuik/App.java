@@ -11,12 +11,13 @@ import cuik.data.SqlClient;
 import cuik.data.UserRepository;
 import cuik.server.ServerBuilder;
 import cuik.utilities.Configuration;
-import cuik.utilities.Container;
+import cuik.utilities.CuikLogger;
+import cuik.utilities.container.Container;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class App {
-
     public static void main(String[] args) throws Exception {
         Configuration.loadConfig();
 
@@ -46,11 +47,11 @@ public class App {
 
         var periodicTask = new Runnable() {
             public void run() {
-                // Invoke method(s) to do the work
+                CuikLogger.flush();
             }
         };
 
-        executor.scheduleAtFixedRate(periodicTask, 0, 30, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(periodicTask, 0, 1, TimeUnit.SECONDS);
     }
 
     private static void initializeDependencies() {

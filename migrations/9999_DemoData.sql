@@ -2,42 +2,27 @@ USE `cuik`;
 
 SET NAMES 'utf8';
 
-INSERT INTO
-    Menus (id, name, is_active)
-VALUES (
-        '94218e67-d8e0-4951-b5a3-7cbc8095fe4b',
-        'Comida',
-        1
-    );
+INSERT INTO Menus (id, name, is_active)
+VALUES ('94218e67-d8e0-4951-b5a3-7cbc8095fe4b','Comida', 1);
 
-INSERT INTO
-    MenuItems (
-        id,
-        menu_id,
-        name,
-        description,
-        category,
-        price,
-        available,
-        estimated_prep_time
-    )
+INSERT INTO MenuItems
+    (id, menu_id, name, description, category, price, available, estimated_prep_time)
 VALUES (
-        '4b7ec8c2-78a8-4bda-8c59-1ef19b7985ba',
-        '94218e67-d8e0-4951-b5a3-7cbc8095fe4b',
-        'Empanadas de Carne Cortada a Cuchillo',
-        'Empanadas tradicionales horneadas, rellenas de carne cortada a cuchillo, cebolla, aceitunas y huevo duro.',
-        'Entradas',
-        4000,
-        1,
-        15
-    );
+    '4b7ec8c2-78a8-4bda-8c59-1ef19b7985ba',
+    '94218e67-d8e0-4951-b5a3-7cbc8095fe4b',
+    'Empanadas de Carne Cortada a Cuchillo',
+    'Empanadas tradicionales horneadas, rellenas de carne cortada a cuchillo, cebolla, aceitunas y huevo duro.',
+    'Entradas',
+    4000,
+    1,
+    15
+);
 
 INSERT INTO
     MenuItemAllergens (menu_item_id, allergen_id)
 SELECT '4b7ec8c2-78a8-4bda-8c59-1ef19b7985ba' AS menu_item_id, A.id AS allergen_id
 FROM Allergens A
-WHERE
-    A.name = 'Gluten';
+WHERE A.name = 'Gluten';
 
 INSERT INTO
     MenuItemAllergens (menu_item_id, allergen_id)

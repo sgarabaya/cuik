@@ -11,7 +11,6 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
 public class ServerHandler extends Handler.Abstract {
-
     private final Router router;
 
     public ServerHandler(Router router) {
@@ -51,14 +50,10 @@ public class ServerHandler extends Handler.Abstract {
 
         var logger = Logger.getLogger(String.format("[%s] %s", method, path));
 
-        var context = new HttpContext(
-                logger,
-                request,
-                response,
-                callback,
-                params);
+        var context = new HttpContext(logger, request, response, callback, params);
 
         route.handler().func(context);
+
         return true;
     }
 }
