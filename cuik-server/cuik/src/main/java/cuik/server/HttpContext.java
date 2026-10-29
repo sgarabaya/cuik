@@ -113,7 +113,7 @@ public class HttpContext {
     public <T> void respond(T obj, int status) {
         if (obj == null) {
             response.setStatus(204);
-            respond(ByteBuffer.allocate(0));
+            respond(new byte[0]);
         } else {
             setContentType("application/json");
             response.setStatus(status);

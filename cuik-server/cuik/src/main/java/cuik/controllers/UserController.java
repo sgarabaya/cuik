@@ -2,7 +2,10 @@ package cuik.controllers;
 
 import cuik.data.UserRepository;
 import cuik.data.models.User;
+import cuik.data.pojo.UserPayload;
+import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.*;
+import cuik.utilities.Crypto;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,12 +29,34 @@ public class UserController extends BaseController {
     }
 
     @Post
-    public void createUser(@FromBody User user) throws Exception {
-        repository.create(user);
+    public UUID createUser(@FromBody UserPayload payload) throws Exception {
+        if (payload.password() == null || payload.password().isBlank())
+            throw new CuikValidationException("La contrasena es requerida");
+
+        var user = new User();
+        user.setName(payload.name());
+        user.setEmail(payload.email());
+        user.setPasswordHash(Crypto.hash(payload.password()));
+
+        return repository.create(user);
     }
 
-    @Delete
-    public void deleteUser(@FromBody User user) throws Exception {
-        repository.delete(user.getId());
+    @Put
+    public boolean updateUser(@FromBody UserPayload payload) throws Exception {
+        var user = new User();
+        user.setId(payload.id());
+        user.setName(payload.name());
+        user.setEmail(payload.email());
+
+        if (payload.password() != null && !payload.password().isBlank())
+            user.setPasswordHash(Crypto.hash(payload.password()));
+
+        return repository.update(user);
+    }
+
+    @Delete("{id}")
+    public void deleteUser(String id) throws Exception {
+        var userId = UUID.fromString(id);
+        repository.delete(userId);
     }
 }

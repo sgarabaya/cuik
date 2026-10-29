@@ -1,6 +1,7 @@
 package cuik.data;
 
 import cuik.data.models.BaseEntity;
+import cuik.exceptions.CuikInternalException;
 import cuik.utilities.Configuration;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -143,24 +145,66 @@ public abstract class Repository<T extends BaseEntity> {
                 id.toString()) == 1);
     }
 
-    public boolean create(T obj) throws Exception {
-        var classColumns = AutoMapper.getColumns(getModelClass());
-
+    public UUID create(T obj) throws Exception {
         var columns = new HashMap<String, Object>();
 
-        for (var column : classColumns) {
-            var field = column.field();
-            var value = field.getType().cast(field.get(obj));
+        for (var column : AutoMapper.getColumns(getModelClass())) {
+            var value = column.field().get(obj);
             if (value != null)
                 columns.put(column.name(), value);
         }
 
-        var columnNames = String.join(",", columns.keySet().stream().map(k -> String.format("`%s`", k)).toList());
-        var valuePlaceholders = String.join(",", columns.keySet().stream().map(c -> "?").toList());
-        var query = String.format(
-                "INSERT INTO %s (%s) VALUES (%s)",
-                getTableName(), columnNames, valuePlaceholders);
+        try (var conn = connect()) {
+            var id = UUID.randomUUID();
 
-        return execute(query, columns.values().toArray()) == 1;
+            obj.setId(id);
+            columns.put("id", id);
+
+            var columnNames = String.join(",", columns.keySet().stream().map(k -> String.format("`%s`", k)).toList());
+            var valuePlaceholders = String.join(",", columns.keySet().stream().map(c -> "?").toList());
+            var query = String.format(
+                    "INSERT INTO %s (%s) VALUES (%s)",
+                    getTableName(), columnNames, valuePlaceholders);
+
+            try (var stmt = preparedStatement(conn, query, columns.values().toArray())) {
+                if (stmt.executeUpdate() != 1)
+                    throw new CuikInternalException(
+                            String.format("Could not create %s", getModelClass().getSimpleName()));
+            }
+        }
+
+        return obj.getId();
+    }
+
+    private static final Set<String> READ_ONLY_COLUMNS = Set.of("id", "created", "updated");
+
+    public boolean update(T obj) throws Exception {
+        if (obj.getId() == null)
+            throw new IllegalArgumentException("No se puede actualizar una entidad sin id");
+
+        var columns = new HashMap<String, Object>();
+
+        for (var column : AutoMapper.getColumns(getModelClass())) {
+            if (READ_ONLY_COLUMNS.contains(column.name()))
+                continue;
+
+            var value = column.field().get(obj);
+            if (value != null)
+                columns.put(column.name(), value);
+        }
+
+        if (columns.isEmpty())
+            return false;
+
+        var assignments = String.join(",", columns.keySet().stream()
+                .map(c -> String.format("`%s` = ?", c))
+                .toList());
+
+        var query = String.format("UPDATE %s SET %s WHERE id = ?;", getTableName(), assignments);
+
+        var params = new ArrayList<>(columns.values());
+        params.add(obj.getId());
+
+        return execute(query, params.toArray()) == 1;
     }
 }

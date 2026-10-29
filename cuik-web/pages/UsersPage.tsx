@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { DataTable } from '../components/DataTable';
 import { User } from '../api/models';
-import { createUser, fetchUsers, updateUser } from '../api';
+import { createUser, deleteUser, fetchUsers, updateUser } from '../api';
 
 const EditUser = (props: { user?: User, close: Function }) => {
     const [name, setName] = useState<string>(props.user?.name ?? '');
@@ -19,8 +19,8 @@ const EditUser = (props: { user?: User, close: Function }) => {
             await updateUser(user);
         }
         else {
-            await createUser({ name, email });
             user.password = password;
+            await createUser(user);
         }
 
         window.location.reload();
@@ -40,10 +40,10 @@ const EditUser = (props: { user?: User, close: Function }) => {
 
     return <dialog open>
         <article style="max-width:600px">
-            <h2>Crear Usuario</h2>
+            <h2>{props.user ? 'Editar Usuario' : 'Crear Usuario'}</h2>
             <form>
-                <input type="text" name="name" class="full-width" placeholder="Nombre" onInput={updateName} />
-                <input type="email" name="email" class="full-width" placeholder="Email" onInput={updateEmail} />
+                <input type="text" name="name" class="full-width" placeholder="Nombre" onInput={updateName} value={name} />
+                <input type="email" name="email" class="full-width" placeholder="Email" onInput={updateEmail} value={email} />
                 <input type="password" name="password" class="full-width" placeholder="Password" onInput={updatePassword} />
             </form>
 
@@ -58,6 +58,7 @@ const EditUser = (props: { user?: User, close: Function }) => {
 export function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User>();
 
     const [search, setSearch] = useState<string>('');
 
@@ -71,8 +72,28 @@ export function UsersPage() {
 
     useEffect(() => { loadUsers(); }, []);
 
-    const handleNewUser = () => setShowModal(true);
-    const closeDialog = () => setShowModal(false);
+    const handleNewUser = () => {
+        setSelectedUser(undefined);
+        setShowModal(true);
+    };
+
+    const handleEditUser = (user: User) => {
+        setSelectedUser(user);
+        setShowModal(true);
+    };
+
+    const handleDeleteUser = async (user: User) => {
+        if (!confirm(`Eliminar a ${user.name}?`))
+            return;
+
+        if (await deleteUser(user.id))
+            window.location.reload();
+    };
+
+    const closeDialog = () => {
+        setShowModal(false);
+        setSelectedUser(undefined);
+    };
 
     return (
         <>
@@ -100,16 +121,17 @@ export function UsersPage() {
                             { header: 'Email', key: 'email' }
                         ]}
                         renderActions={user => (
-                            <>
-                                {<span>No actions</span>}
-                            </>
+                            <div class="flex">
+                                <button type="button" onClick={() => handleEditUser(user)}>Editar</button>
+                                <button type="button" class="cancel" onClick={() => handleDeleteUser(user)}>Eliminar</button>
+                            </div>
                         )}
                     />
                 </div>
             </article>
             {
                 showModal
-                    ? <EditUser close={closeDialog} />
+                    ? <EditUser user={selectedUser} close={closeDialog} />
                     : null
             }
         </>

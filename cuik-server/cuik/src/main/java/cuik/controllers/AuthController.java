@@ -13,7 +13,6 @@ import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Post;
 import cuik.utilities.Configuration;
 import cuik.utilities.Crypto;
-import java.util.UUID;
 
 @Controller("/api/auth")
 public class AuthController extends BaseController {
@@ -54,15 +53,14 @@ public class AuthController extends BaseController {
             throw new CuikValidationException("El usuario ya esta registrado");
 
         user = new User();
-        user.setId(UUID.randomUUID());
         user.setName(request.name());
         user.setEmail(request.email());
         user.setPasswordHash(Crypto.hash(request.password()));
 
-        repository.create(user);
+        var id = repository.create(user);
 
         var token = authenticate(user, request.password());
 
-        return new RegisterResponse(user.getId(), token);
+        return new RegisterResponse(id, token);
     }
 }
