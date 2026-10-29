@@ -1,24 +1,31 @@
 package cuik.server;
 
-import cuik.server.router.RouteHandler;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import cuik.server.router.RouteHandler;
+import cuik.utilities.Configuration;
+
 public class StaticFileHandler implements RouteHandler {
 
-    private final String baseResourcePath;
+    private final String basePath;
+    private final boolean useFileSystem;
     private final Map<String, String> mimeTypes;
 
-    public StaticFileHandler(String baseResourcePath) {
-        if (!baseResourcePath.startsWith("/")) {
-            baseResourcePath = "/" + baseResourcePath;
+    public StaticFileHandler() {
+        var staticDir = Configuration.getStaticDir();
+        if (staticDir != null && !staticDir.isEmpty()) {
+            this.useFileSystem = true;
+            this.basePath = staticDir;
+        } else {
+            this.useFileSystem = false;
+            var baseResourcePath = "/static";
+            this.basePath = baseResourcePath;
         }
-        if (baseResourcePath.endsWith("/")) {
-            baseResourcePath = baseResourcePath.substring(0, baseResourcePath.length() - 1);
-        }
-        this.baseResourcePath = baseResourcePath;
 
         this.mimeTypes = new HashMap<String, String>();
         mimeTypes.put("html", "text/html");
@@ -29,6 +36,25 @@ public class StaticFileHandler implements RouteHandler {
         mimeTypes.put("jpeg", "image/jpeg");
         mimeTypes.put("gif", "image/gif");
         mimeTypes.put("svg", "image/svg+xml");
+        mimeTypes.put("ico", "image/x-icon");
+    }
+
+    private byte[] loadResource(String basePath, String resourcePath) throws IOException {
+        var fullResourcePath = basePath + resourcePath;
+        InputStream is = getClass().getResourceAsStream(fullResourcePath);
+        if (is == null)
+            return null;
+        return is.readAllBytes();
+    }
+
+    private byte[] loadFile(String basePath, String resourcePath) throws IOException {
+        var relativePath = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+        var fullPath = Paths.get(basePath).resolve(relativePath);
+
+        if (!Files.exists(fullPath) || Files.isDirectory(fullPath))
+            return null;
+
+        return Files.readAllBytes(fullPath);
     }
 
     @Override
@@ -36,40 +62,35 @@ public class StaticFileHandler implements RouteHandler {
         var requestPath = context.getPath();
 
         if (requestPath.contains("..")) {
-            context.logger.warning(
-                    "Potential directory traversal attempt blocked: " + requestPath);
+            context.logger.warning("Potential directory traversal attempt blocked: " + requestPath);
             context.respondNotFound();
             return;
         }
 
-        if (!requestPath.startsWith("/")) {
+        if (!requestPath.startsWith("/"))
             requestPath = "/" + requestPath;
-        }
 
-        var fullResourcePath = baseResourcePath + requestPath;
+        if (requestPath.equals("/"))
+            requestPath = "/index.html";
+
         var mimeType = determineMimeType(requestPath);
 
         if (mimeType == null) {
-            context.logger.warning(
-                    "Could not determine MIME type for file: " + requestPath);
+            context.logger.warning("Could not determine MIME type for file: " + requestPath);
             mimeType = "application/octet-stream";
         }
 
-        try (InputStream is = getClass().getResourceAsStream(fullResourcePath)) {
-            if (is == null) {
-                context.logger.warning("Resource not found: " + fullResourcePath);
+        try {
+            var fileContent = useFileSystem ? loadFile(basePath, requestPath) : loadResource(basePath, requestPath);
+
+            if (fileContent == null) {
+                context.logger.severe("Error reading static content: " + requestPath);
                 context.respondNotFound();
-                return;
-            }
-
-            var fileContent = is.readAllBytes();
-            context.respond(fileContent, mimeType);
-
+            } else
+                context.respond(fileContent, mimeType);
         } catch (IOException e) {
-            context.logger.severe(
-                    "Error reading static resource " + fullResourcePath + ": " + e.getMessage());
-            context.respond(
-                    new RuntimeException("Resource not found or read error"));
+            context.logger.severe("Error reading static content: " + e.getMessage());
+            context.respondNotFound();
         }
     }
 

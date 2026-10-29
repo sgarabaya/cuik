@@ -1,0 +1,17 @@
+{
+  "name": "cuik-web",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite . --port 8081"
+  },
+  "keywords": [],
+  "type": "module",
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "preact": "^11.0.1",
+    "vite": "^8.3.4",
+    "wouter-preact": "^3.13.0"
+  }
+}

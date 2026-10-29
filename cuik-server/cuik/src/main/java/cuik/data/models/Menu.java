@@ -1,14 +1,17 @@
 package cuik.data.models;
 
+import java.util.List;
+
 import cuik.data.Column;
 
 public class Menu extends BaseEntity {
-
     @Column
-    public String name;
+    private String name;
 
     @Column("is_active")
-    public boolean isActive;
+    private boolean isActive;
+
+    private List<MenuItem> items;
 
     public String getName() {
         return name;
@@ -24,5 +27,13 @@ public class Menu extends BaseEntity {
 
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public List<MenuItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<MenuItem> items) {
+        this.items = items;
     }
 }

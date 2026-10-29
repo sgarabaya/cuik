@@ -5,10 +5,12 @@ import cuik.utilities.Configuration;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 public abstract class Repository<T extends BaseEntity> {
 
@@ -61,6 +63,20 @@ public abstract class Repository<T extends BaseEntity> {
                 Configuration.getConnectionString(),
                 Configuration.getDatabaseUser(),
                 Configuration.getDatabasePassword());
+    }
+
+    protected List<T> queryMultiple(Function<Statement, List<T>> fn, String query, Object... params) throws Exception {
+        var conn = connect();
+        var stmt = preparedStatement(conn, query, params);
+
+        if (stmt.execute())
+            return fn.apply(stmt);
+        return new ArrayList<T>();
+    }
+
+    protected <A, B, C> List<A> queryMultiple(Class<A> classA, Class<B> classB, Class<C> classC, String query,
+            Object... params) {
+        return null;
     }
 
     protected <R> List<R> queryRaw(Class<R> classT, String query, Object... params) throws Exception {

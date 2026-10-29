@@ -26,8 +26,12 @@ public class UserController extends BaseController {
     }
 
     @Post
-    public User createUser(@FromBody User user) {
-        System.out.println(user);
-        return user;
+    public void createUser(@FromBody User user) throws Exception {
+        repository.create(user);
+    }
+
+    @Delete
+    public void deleteUser(@FromBody User user) throws Exception {
+        repository.delete(user.getId());
     }
 }

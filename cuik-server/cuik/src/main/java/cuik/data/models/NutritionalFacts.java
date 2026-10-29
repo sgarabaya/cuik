@@ -3,7 +3,7 @@ package cuik.data.models;
 import cuik.data.Column;
 import java.util.UUID;
 
-public class NutritionalFact extends BaseEntity {
+public class NutritionalFacts extends BaseEntity {
 
     @Column("menu_item_id")
     public UUID menuItemId;

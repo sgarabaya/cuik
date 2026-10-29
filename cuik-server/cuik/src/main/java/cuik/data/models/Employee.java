@@ -2,8 +2,7 @@ package cuik.data.models;
 
 import cuik.data.Column;
 
-public class Employee extends BaseEntity {
-
+public class Employee extends User {
     @Column("is_admin")
     public boolean isAdmin;
 

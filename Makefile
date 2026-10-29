@@ -1,13 +1,22 @@
-build: build-server
+build: build-server build-web
 	@echo 'Done.'
+
+dev: build-server build-web
+	@echo 'Watching...'
 
 run-server: build-server
 	java -jar ./bin/cuik.jar
+
+watch-web:
+	vite build cuik-web/ -w --emptyOutDir
 
 build-server: clean-server bin
 	gradle -p cuik-server build
 	gradle -p cuik-server shadowJar
 	mv cuik-server/cuik.jar ./bin/
+
+build-web:
+	vite build cuik-web/ --emptyOutDir
 
 clean-server:
 	gradle -p cuik-server clean

@@ -1,0 +1,31 @@
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+nav a:hover {
+    color: var(--text);
+    font-weight: bold;
+}
+
+nav .nav-separator {
+    color: var(--border);
+    user-select: none;
+}
+
+nav .navbar-active {
+    color: var(--text);
+    font-weight: 600;
+}

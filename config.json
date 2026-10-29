@@ -2,5 +2,6 @@
   "DB_CONNECTION_STRING": "jdbc:mysql://localhost:3306/cuik?useUnicode=true&characterEncoding=utf-8",
   "DB_USER": "root",
   "DB_PWD": "root",
-  "JWT_SECRET": "es.muy.secreto"
+  "JWT_SECRET": "es.muy.secreto",
+  "WWW_DIR": "./public"
 }

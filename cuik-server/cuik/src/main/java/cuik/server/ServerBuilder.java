@@ -28,12 +28,12 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder useStaticFiles(String basePath) {
-        var staticHandler = new StaticFileHandler(basePath);
+    public ServerBuilder useStaticFiles() {
+        var staticHandler = new StaticFileHandler();
         router.setFallback(staticHandler);
         logger.log(
                 Level.INFO,
-                "Registered Static File Handler for base path: " + basePath);
+                "Registered Static File Handler");
         return this;
     }
 

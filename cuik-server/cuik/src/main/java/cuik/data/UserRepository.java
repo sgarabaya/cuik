@@ -3,7 +3,6 @@ package cuik.data;
 import cuik.data.models.User;
 
 public class UserRepository extends Repository<User> {
-
     public UserRepository(SqlClient client) {
         super(client);
     }

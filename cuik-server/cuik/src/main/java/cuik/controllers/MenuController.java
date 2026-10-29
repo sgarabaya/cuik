@@ -9,7 +9,7 @@ import cuik.server.annotations.Get;
 import java.util.List;
 import java.util.UUID;
 
-@Controller("/api/menu")
+@Controller("/api/menus")
 public class MenuController extends BaseController {
     private final MenuAdapter menuAdapter;
 

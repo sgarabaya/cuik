@@ -1,15 +1,19 @@
 package cuik.data.models;
 
 import cuik.data.Column;
+
+import java.util.List;
 import java.util.UUID;
 
 public class MenuItem extends BaseEntity {
-
     @Column("menu_id")
     private UUID menuId;
 
     @Column
     private String name;
+
+    @Column
+    private String category;
 
     @Column
     private String description;
@@ -22,6 +26,10 @@ public class MenuItem extends BaseEntity {
 
     @Column("estimated_prep_time")
     private int estimatedPrepTime;
+
+    private NutritionalFacts nutritionalFacts;
+
+    private List<Allergen> allergens;
 
     public UUID getMenuId() {
         return menuId;
@@ -37,6 +45,14 @@ public class MenuItem extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDescription() {
@@ -69,5 +85,21 @@ public class MenuItem extends BaseEntity {
 
     public void setEstimatedPrepTime(int estimatedPrepTime) {
         this.estimatedPrepTime = estimatedPrepTime;
+    }
+
+    public NutritionalFacts getNutritionalFacts() {
+        return nutritionalFacts;
+    }
+
+    public void setNutritionalFacts(NutritionalFacts nutritionalFacts) {
+        this.nutritionalFacts = nutritionalFacts;
+    }
+
+    public List<Allergen> getAllergens() {
+        return allergens;
+    }
+
+    public void setAllergens(List<Allergen> allergens) {
+        this.allergens = allergens;
     }
 }
