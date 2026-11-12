@@ -2,7 +2,7 @@ import { JSX } from 'preact';
 
 interface Column<T> {
     header: string;
-    key: string | ((item: T) => string);
+    key: string | ((item: T) => JSX.Element);
 }
 
 interface DataTableProps<T extends { id: string }> {

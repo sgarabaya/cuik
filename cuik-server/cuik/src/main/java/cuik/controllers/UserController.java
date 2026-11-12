@@ -1,35 +1,26 @@
 package cuik.controllers;
 
+import com.google.gson.JsonElement;
+
 import cuik.data.UserRepository;
 import cuik.data.models.User;
 import cuik.data.pojo.UserPayload;
 import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.*;
 import cuik.utilities.Crypto;
-import java.util.List;
-import java.util.UUID;
+import cuik.utilities.Strings;
+import cuik.utilities.Transform;
 
 @Controller("/api/users")
-public class UserController extends BaseController {
-
-    private final UserRepository repository;
-
+public class UserController extends CrudController<User, UserRepository> {
     public UserController(UserRepository repository) {
-        this.repository = repository;
+        super(repository);
     }
 
-    @Get
-    public List<User> getUsers() throws Exception {
-        return repository.fetch();
-    }
+    @Override
+    protected User _create(JsonElement element) throws Exception {
+        var payload = Transform.fromJsonElement(element, UserPayload.class);
 
-    @Get("{id}")
-    public User getUserById(String id) throws Exception {
-        return repository.findById(UUID.fromString(id));
-    }
-
-    @Post
-    public UUID createUser(@FromBody UserPayload payload) throws Exception {
         if (payload.password() == null || payload.password().isBlank())
             throw new CuikValidationException("La contrasena es requerida");
 
@@ -38,25 +29,22 @@ public class UserController extends BaseController {
         user.setEmail(payload.email());
         user.setPasswordHash(Crypto.hash(payload.password()));
 
-        return repository.create(user);
+        return user;
     }
 
-    @Put
-    public boolean updateUser(@FromBody UserPayload payload) throws Exception {
-        var user = new User();
-        user.setId(payload.id());
-        user.setName(payload.name());
-        user.setEmail(payload.email());
+    @Override
+    protected User _update(User object, JsonElement element) throws Exception {
+        var payload = Transform.fromJsonElement(element, UserPayload.class);
 
-        if (payload.password() != null && !payload.password().isBlank())
-            user.setPasswordHash(Crypto.hash(payload.password()));
+        if (!Strings.isEmpty(payload.name()))
+            object.setName(payload.name());
 
-        return repository.update(user);
-    }
+        if (!Strings.isEmpty(payload.email()))
+            object.setEmail(payload.email());
 
-    @Delete("{id}")
-    public void deleteUser(String id) throws Exception {
-        var userId = UUID.fromString(id);
-        repository.delete(userId);
+        if (!Strings.isEmpty(payload.password()))
+            object.setPasswordHash(Crypto.hash(payload.password()));
+
+        return object;
     }
 }

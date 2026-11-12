@@ -1,59 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
+import { SquarePen, Trash } from 'lucide-preact';
+
+import { userService, type User } from '../api';
+
+import { EditUser } from './UsersPage.Edit';
+
+import { SquareButton } from '../components/SquareButton';
 import { DataTable } from '../components/DataTable';
-import { User } from '../api/models';
-import { createUser, deleteUser, fetchUsers, updateUser } from '../api';
-
-const EditUser = (props: { user?: User, close: Function }) => {
-    const [name, setName] = useState<string>(props.user?.name ?? '');
-    const [email, setEmail] = useState<string>(props.user?.email ?? '');
-    const [password, setPassword] = useState<string>('');
-
-    const save = async () => {
-        const user: Partial<User> = { name, email };
-        if (props.user) {
-            user.id = props.user.id;
-
-            if (password.length > 0)
-                user.password = password;
-
-            await updateUser(user);
-        }
-        else {
-            user.password = password;
-            await createUser(user);
-        }
-
-        window.location.reload();
-    };
-
-    const updateName = (ev: InputEvent) => {
-        setName((ev.target as HTMLInputElement).value);
-    };
-
-    const updateEmail = (ev: InputEvent) => {
-        setEmail((ev.target as HTMLInputElement).value);
-    };
-
-    const updatePassword = (ev: InputEvent) => {
-        setPassword((ev.target as HTMLInputElement).value);
-    };
-
-    return <dialog open>
-        <article style="max-width:600px">
-            <h2>{props.user ? 'Editar Usuario' : 'Crear Usuario'}</h2>
-            <form>
-                <input type="text" name="name" class="full-width" placeholder="Nombre" onInput={updateName} value={name} />
-                <input type="email" name="email" class="full-width" placeholder="Email" onInput={updateEmail} value={email} />
-                <input type="password" name="password" class="full-width" placeholder="Password" onInput={updatePassword} />
-            </form>
-
-            <div class="controls-bar">
-                <button class="cancel" onClick={() => props.close()}>Cerrar</button>
-                <button class="success" onClick={save}>Guardar</button>
-            </div>
-        </article>
-    </dialog>;
-};
+import { fuzzyFilter, normalizeString } from '../utils/String';
 
 export function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -62,15 +16,14 @@ export function UsersPage() {
 
     const [search, setSearch] = useState<string>('');
 
-    const loadUsers = async () => {
-        try {
-            setUsers(await fetchUsers());
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    useEffect(() => { loadUsers(); }, []);
+    useEffect(() => {
+        userService.fetch()
+            .then(v => {
+                const sorted = v.sort((a, b) => normalizeString(a.name) < normalizeString(b.name) ? -1 : 1);
+                setUsers(sorted);
+            })
+            .catch(console.error);
+    }, []);
 
     const handleNewUser = () => {
         setSelectedUser(undefined);
@@ -86,7 +39,7 @@ export function UsersPage() {
         if (!confirm(`Eliminar a ${user.name}?`))
             return;
 
-        if (await deleteUser(user.id))
+        if (await userService.delete(user))
             window.location.reload();
     };
 
@@ -99,9 +52,7 @@ export function UsersPage() {
         <>
             <article>
                 <header>
-                    <h2>Usuarios
-                        <button type="button" class="float-right" onClick={handleNewUser}>Crear Usuario</button>
-                    </h2>
+                    <h2>Usuarios</h2>
                     <div class="controls">
                         <input
                             type="text"
@@ -110,11 +61,12 @@ export function UsersPage() {
                             value={search}
                             onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
                         />
+                        <button type="button" onClick={handleNewUser}>Crear</button>
                     </div>
                 </header>
                 <div style="padding:.5rem">
                     <DataTable
-                        data={users}
+                        data={search ? fuzzyFilter(users, ['name', 'email'], search) : users}
                         columns={[
                             { header: 'ID', key: 'id' },
                             { header: 'Nombre', key: 'name' },
@@ -122,18 +74,14 @@ export function UsersPage() {
                         ]}
                         renderActions={user => (
                             <div class="flex">
-                                <button type="button" onClick={() => handleEditUser(user)}>Editar</button>
-                                <button type="button" class="cancel" onClick={() => handleDeleteUser(user)}>Eliminar</button>
+                                <SquareButton icon={<SquarePen />} tooltip='Editar' onClick={() => handleEditUser(user)} />
+                                <SquareButton icon={<Trash />} tooltip='Eliminar' class="cancel" onClick={() => handleDeleteUser(user)} />
                             </div>
                         )}
                     />
                 </div>
             </article>
-            {
-                showModal
-                    ? <EditUser user={selectedUser} close={closeDialog} />
-                    : null
-            }
+            {showModal ? <EditUser user={selectedUser} close={closeDialog} /> : null}
         </>
     );
 }

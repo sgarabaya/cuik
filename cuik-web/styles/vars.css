@@ -8,9 +8,14 @@
     --primary-hover: #1d4ed8;
     --danger: #ef4444;
     --danger-hover: #dc2626;
+
+    --orange: #ef5b25;
+    --orange-hover: #ef5b25af;
+
     --success: #10b981;
     --success-hover: #0e9568;
     --radius: 8px;
+    --max-width: 960px;
 }
 
 [data-theme="dark"] {

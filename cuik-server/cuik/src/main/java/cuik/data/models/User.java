@@ -11,7 +11,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column("password_hash")
-    private String passwordHash;
+    private transient String passwordHash;
 
     public String getName() {
         return name;

@@ -7,16 +7,19 @@ dev: build-server build-web
 run-server: build-server
 	java -jar ./bin/cuik.jar
 
-watch-web:
-	vite build cuik-web/ -w --emptyOutDir
+watch-web: npm-i
+	cd cuik-web && npx vite build . -w --emptyOutDir
 
 build-server: clean-server bin
 	gradle -p cuik-server build
 	gradle -p cuik-server shadowJar
 	mv cuik-server/cuik.jar ./bin/
 
-build-web:
-	vite build cuik-web/ --emptyOutDir
+build-web: npm-i
+	cd cuik-web ; npx vite build . --emptyOutDir
+
+npm-i:
+	cd cuik-web ; npm i
 
 clean-server:
 	gradle -p cuik-server clean

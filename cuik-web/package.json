@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "vite . --port 8081"
+    "start": "npx vite . --port 8081"
   },
   "keywords": [],
   "type": "module",
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
-    "preact": "^11.0.1",
-    "vite": "^8.3.4",
+    "lucide-preact": "^1.70.0",
+    "preact": "^11.2.0",
+    "vite": "^8.3.6",
     "wouter-preact": "^3.13.0"
   }
 }

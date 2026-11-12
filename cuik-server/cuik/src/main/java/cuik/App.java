@@ -2,8 +2,10 @@ package cuik;
 
 import cuik.adapters.MenuAdapter;
 import cuik.controllers.AuthController;
+import cuik.controllers.EmployeeController;
 import cuik.controllers.MenuController;
 import cuik.controllers.UserController;
+import cuik.data.EmployeeRepository;
 import cuik.data.MenuItemRepository;
 import cuik.data.MenuRepository;
 import cuik.data.SqlClient;
@@ -26,17 +28,18 @@ public class App {
         var server = new ServerBuilder()
                 .usePort(8080)
                 .useController(UserController.class)
+                .useController(EmployeeController.class)
                 .useController(AuthController.class)
                 .useController(MenuController.class)
                 .useStaticFiles()
                 .build();
 
         server.start();
-        System.out.println(
-                "\n**************************\n" +
-                        "Server started!\n" +
-                        "Listening @ localhost:8080" +
-                        "\n**************************\n");
+        System.out.println("\n**************************\n"
+                + "Server started!\n"
+                + "Listening @ localhost:8080"
+                + "\n**************************\n");
+
         server.await();
     }
 
@@ -57,6 +60,7 @@ public class App {
 
         // repos
         Container.register(UserRepository.class);
+        Container.register(EmployeeRepository.class);
         Container.register(MenuRepository.class);
         Container.register(MenuItemRepository.class);
 
@@ -66,6 +70,7 @@ public class App {
         // controllers
         Container.register(AuthController.class);
         Container.register(UserController.class);
+        Container.register(EmployeeController.class);
         Container.register(MenuController.class);
     }
 }

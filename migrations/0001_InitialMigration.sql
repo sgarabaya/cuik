@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `Employees` (
     `name` VARCHAR(256) NOT NULL UNIQUE,
     `email` VARCHAR(256) NOT NULL UNIQUE,
     `password_hash` VARCHAR(512) NOT NULL,
-    `isAdmin` BIT DEFAULT 0
+    `is_admin` BIT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS `Menus` (
@@ -79,23 +79,3 @@ CREATE TABLE IF NOT EXISTS `MenuItemAllergens` (
     FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems` (`id`) ON DELETE CASCADE,
     FOREIGN KEY (`allergen_id`) REFERENCES `Allergens` (`id`) ON DELETE RESTRICT
 );
-
-/*
-Insert test records:
-*/
-INSERT IGNORE INTO
-    `Employees` (
-        `id`,
-        `name`,
-        `email`,
-        `password_hash`,
-        `isAdmin`
-    )
-VALUES (
-        '00000000-0000-0000-0000-000000000000',
-        'admin',
-        'admin@cuik.food',
-        -- pwd: "admin"
-        '$argon2i$v=19$m=65536,t=10,p=1$yS/ozAZroTl+zQVklkg5Hg$oNf3i23mu9kUnzVCuTnA0Gtlh1LDq4RnpDSR8a2ytvg',
-        1
-    );

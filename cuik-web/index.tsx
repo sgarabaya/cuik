@@ -5,7 +5,7 @@ import { useHashLocation } from 'wouter-preact/use-hash-location';
 import { Navbar } from './components/Navbar';
 
 import { UsersPage } from './pages/UsersPage';
-const EmployeesPage = (props: any) => <h1>Employees</h1>;
+import { EmployeesPage } from './pages/EmployeesPage';
 const MenusPage = (props: any) => <h1>Menus</h1>;
 const TablesPage = (props: any) => <h1>Tables</h1>;
 const PurchasesPage = (props: any) => <h1>Purchases</h1>;

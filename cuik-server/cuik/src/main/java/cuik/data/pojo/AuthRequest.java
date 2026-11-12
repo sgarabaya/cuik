@@ -1,3 +1,4 @@
 package cuik.data.pojo;
 
-public record AuthRequest(String name, String password) {}
+public record AuthRequest(String email, String password) {
+}

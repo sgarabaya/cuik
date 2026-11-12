@@ -2,6 +2,8 @@ package cuik.utilities;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -9,11 +11,10 @@ import java.util.Base64;
 import java.util.UUID;
 
 public abstract class Transform {
-
     private static final Gson gson = new GsonBuilder()
-        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-        .registerTypeAdapterFactory(new HierarchyOrderTypeAdapterFactory())
-        .create();
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapterFactory(new HierarchyOrderTypeAdapterFactory())
+            .create();
 
     public static String fromBytes(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
@@ -21,6 +22,10 @@ public abstract class Transform {
 
     public static byte[] toBytes(String input) {
         return input.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static <T> T fromJsonElement(JsonElement element, Class<T> classT) {
+        return gson.fromJson(element, classT);
     }
 
     public static <T> T fromJson(byte[] bytes, Class<T> classT) {

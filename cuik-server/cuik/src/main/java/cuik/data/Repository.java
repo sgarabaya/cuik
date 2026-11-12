@@ -127,7 +127,7 @@ public abstract class Repository<T extends BaseEntity> {
         }
     }
 
-    public T findById(UUID id) throws Exception {
+    public T fetchById(UUID id) throws Exception {
         var query = String.format(
                 "SELECT * FROM %s WHERE id = ?;",
                 getTableName());

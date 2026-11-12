@@ -1,8 +1,16 @@
 package cuik.controllers;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+
+import cuik.data.EmployeeRepository;
 import cuik.data.UserRepository;
+import cuik.data.models.Employee;
 import cuik.data.models.User;
 import cuik.data.pojo.AuthRequest;
 import cuik.data.pojo.RegisterRequest;
@@ -16,27 +24,50 @@ import cuik.utilities.Crypto;
 
 @Controller("/api/auth")
 public class AuthController extends BaseController {
-    private final UserRepository repository;
+    private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public AuthController(UserRepository repository) {
-        this.repository = repository;
+    public AuthController(UserRepository userRepository, EmployeeRepository employeeRepository) {
+        this.userRepository = userRepository;
+        this.employeeRepository = employeeRepository;
     }
 
-    private String authenticate(User user, String password) throws Exception {
-        if (Crypto.verify(user.getPasswordHash(), password)) {
+    private <T extends User> String authenticate(T entity, String password) throws Exception {
+        if (Crypto.verify(entity.getPasswordHash(), password)) {
             var algorithm = Algorithm.HMAC512(Configuration.getJwtSecret());
-            return JWT.create().sign(algorithm);
+
+            var jwt = JWT.create();
+            jwt.withExpiresAt(LocalDateTime.now().plusDays(5).toInstant(ZoneOffset.UTC));
+
+            if (entity.getClass() == Employee.class) {
+                jwt.withClaim("role", ((Employee) entity).getIsAdmin() ? "admin" : "employee");
+            } else
+                jwt.withClaim("role", "user");
+            return jwt.sign(algorithm);
         }
 
         return null;
     }
 
-    @Post("login")
-    public String login(@FromBody AuthRequest request) throws Exception {
-        var name = request.name();
+    @Post("internal/login")
+    public String loginEmployee(@FromBody AuthRequest request) throws Exception {
+        var email = request.email();
         var password = request.password();
 
-        var user = repository.findByName(name);
+        var employee = employeeRepository.findByEmail(email);
+
+        if (employee == null) // el empleado no existe
+            throw new CuikValidationException("Login invalido");
+
+        return authenticate(employee, password);
+    }
+
+    @Post("login")
+    public String login(@FromBody AuthRequest request) throws Exception {
+        var email = request.email();
+        var password = request.password();
+
+        var user = userRepository.findByEmail(email);
 
         if (user == null) // el usuario no existe
             throw new CuikValidationException("El usuario no esta registrado");
@@ -47,7 +78,7 @@ public class AuthController extends BaseController {
     @Post("register")
     public RegisterResponse register(@FromBody RegisterRequest request)
             throws Exception {
-        var user = repository.findByEmail(request.email());
+        var user = userRepository.findByEmail(request.email());
 
         if (user != null) // el usuario ya esta registrado
             throw new CuikValidationException("El usuario ya esta registrado");
@@ -57,7 +88,7 @@ public class AuthController extends BaseController {
         user.setEmail(request.email());
         user.setPasswordHash(Crypto.hash(request.password()));
 
-        var id = repository.create(user);
+        var id = userRepository.create(user);
 
         var token = authenticate(user, request.password());
 

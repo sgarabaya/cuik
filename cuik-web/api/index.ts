@@ -1,50 +1,37 @@
-import { User } from "./models";
+import { request } from './common';
+import type { User, Employee, BaseEntity } from './models';
 
-export async function fetchUsers(): Promise<User[]> {
-    const response = await fetch('/api/users');
-
-    if (response.ok)
-        return await response.json() as User[];
-
-    return [];
+//Base CRUD client
+abstract class Service<T extends BaseEntity> {
+    protected route: string;
+    constructor(route: string) {
+        this.route = route;
+    }
+    fetch() {
+        return request<T[]>(this.route);
+    }
+    fetchById(id: string) {
+        return request<T | null>(`${this.route}/${id}`);
+    }
+    create(el: Partial<T>) {
+        return request<T | null>(this.route, { body: el, method: 'POST' });
+    }
+    update(el: Partial<T>) {
+        return request<T>(`${this.route}/${el.id}`, { body: el, method: 'PUT' });
+    }
+    delete(el: T) {
+        return request<boolean>(`${this.route}/${el.id}`, { method: 'DELETE' });
+    }
 }
 
-export async function createUser(user: Partial<User>): Promise<string | null> {
-    const response = await fetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify(user),
-        headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (response.ok)
-        return await response.json() as string;
-
-    console.error(await response.text());
-    return null;
+class UserService extends Service<User> {
+    constructor() { super("users"); }
 }
+export const userService = new UserService();
 
-export async function updateUser(user: Partial<User>): Promise<boolean> {
-    const response = await fetch('/api/users', {
-        method: 'PUT',
-        body: JSON.stringify(user),
-        headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (response.ok)
-        return true;
-
-    console.error(await response.text());
-    return false;
+class EmployeeService extends Service<Employee> {
+    constructor() { super("employees"); }
 }
+export const employeeService = new EmployeeService();
 
-export async function deleteUser(id: string): Promise<boolean> {
-    const response = await fetch(`/api/users/${id}`, {
-        method: 'DELETE'
-    });
-
-    if (response.ok)
-        return true;
-
-    console.error(await response.text());
-    return false;
-}
+export type { User, Employee } from './models';

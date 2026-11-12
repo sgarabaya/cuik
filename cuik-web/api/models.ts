@@ -1,7 +1,17 @@
-export interface User {
+export interface BaseEntity {
     id: string;
-    name: string;
     created: Date;
+}
+
+export interface User extends BaseEntity {
+    name: string;
     email: string;
     password?: string;
+}
+
+export interface Employee extends BaseEntity {
+    name: string;
+    email: string;
+    password?: string;
+    isAdmin?: boolean;
 }

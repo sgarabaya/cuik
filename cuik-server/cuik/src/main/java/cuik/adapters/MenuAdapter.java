@@ -25,7 +25,7 @@ public class MenuAdapter {
     }
 
     public MenuView fetchMenu(UUID id) throws Exception {
-        var menu = menuRepository.findById(id);
+        var menu = menuRepository.fetchById(id);
 
         if (menu == null)
             throw new CuikNotFoundException();
