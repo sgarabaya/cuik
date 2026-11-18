@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 
+import svgr from "vite-plugin-svgr";
+
 export default defineConfig({
   build: {
     outDir: '../public',
@@ -12,14 +14,14 @@ export default defineConfig({
       }
     }
   },
-  plugins: [preact()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080/api',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+  plugins: [preact(), svgr()],
+  // server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'http://localhost:8080/api',
+  //       changeOrigin: true,
+  //       rewrite: (path) => path.replace(/^\/api/, '')
+  //     }
+  //   }
+  // }
 });

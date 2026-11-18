@@ -3,6 +3,7 @@ import { JSX } from 'preact';
 interface Column<T> {
     header: string;
     key: string | ((item: T) => JSX.Element);
+    class?: string;
 }
 
 interface DataTableProps<T extends { id: string }> {
@@ -29,7 +30,7 @@ export function DataTable<T extends { id: string }>(props: DataTableProps<T>) {
                     {data.map((item) => (
                         <tr key={item.id}>
                             {columns.map((col, index) => (
-                                <td key={index}>
+                                <td key={index} class={col.class ?? ''}    >
                                     {typeof col.key === 'function' ? col.key(item) : (item[col.key as keyof T] as string)}
                                 </td>
                             ))}

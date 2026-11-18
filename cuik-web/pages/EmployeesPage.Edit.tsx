@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { employeeService, type Employee } from "../api";
+import { Checkbox } from "../components/Checkbox";
 
 export const EditEmployee = (props: { entry?: Employee, close: Function }) => {
     const [name, setName] = useState<string>(props.entry?.name ?? '');
@@ -52,10 +53,6 @@ export const EditEmployee = (props: { entry?: Employee, close: Function }) => {
         setPassword2((ev.target as HTMLInputElement).value);
     };
 
-    const updateIsAdmin = (ev: InputEvent) => {
-        setIsAdmin((ev.target as HTMLInputElement).checked === true);
-    };
-
     return <dialog open>
         <article style="max-width:350px" class={error.length > 0 ? 'red-border' : ''}>
             <h2>{props.entry ? 'Editar' : 'Crear'}</h2>
@@ -63,15 +60,11 @@ export const EditEmployee = (props: { entry?: Employee, close: Function }) => {
                 <input type="text" class="full-width" placeholder="Nombre" onInput={updateName} value={name} />
                 <input type="email" class="full-width" placeholder="Email" onInput={updateEmail} value={email} />
 
-                <label class="checkbox">
-                    <input type="checkbox" checked={isAdmin} onInput={updateIsAdmin} />
-                    <div class="wrapper">
-                        <span>Es Admin</span>
-                        <div class="switch">
-                            <div class="knob"></div>
-                        </div>
-                    </div>
-                </label>
+                <Checkbox
+                    label="Es Admin"
+                    value={isAdmin}
+                    setValue={setIsAdmin}
+                />
 
                 <input type="password" name="password" class="full-width" placeholder="Contraseña" onInput={updatePassword} />
                 {

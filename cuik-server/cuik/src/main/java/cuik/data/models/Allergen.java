@@ -1,23 +1,10 @@
 package cuik.data.models;
 
 import cuik.data.Column;
-import java.util.UUID;
 
-public class Allergen {
-
-    @Column
-    private UUID id;
-
+public class Allergen extends BaseEntity {
     @Column
     private String name;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

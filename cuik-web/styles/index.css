@@ -43,6 +43,10 @@ main {
     overflow: hidden;
 }
 
+textarea {
+    resize: none;
+}
+
 .layout {
     display: grid;
     grid-template-columns: 240px 1fr;
@@ -194,6 +198,10 @@ button:hover {
     color: red;
 }
 
+.green-text {
+    color: var(--success);
+}
+
 .red-border {
     border: 1px solid red;
 }
@@ -201,4 +209,72 @@ button:hover {
 .controls {
     display: flex;
     justify-content: space-between;
+}
+
+.list {
+    position: relative;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    overflow: hidden;
+}
+
+.list li {
+    display: block;
+    list-style: none;
+    padding: .5rem;
+    text-align: center;
+    user-select: none;
+    cursor: pointer;
+}
+
+.list li span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.list li.selected {
+    background-color: var(--primary);
+}
+
+.list li:hover {
+    background-color: var(--primary-hover);
+}
+
+.list .plus {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.5rem;
+    background-color: var(--primary);
+}
+
+.small {
+    height: 1rem;
+}
+
+.center {
+    text-align: center;
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: .5rem;
+}
+
+.columns h3 {
+    margin: .5rem;
+}
+
+.prep-time {
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
 }

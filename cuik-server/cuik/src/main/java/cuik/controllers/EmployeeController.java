@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 
 import cuik.data.EmployeeRepository;
 import cuik.data.models.Employee;
-import cuik.data.pojo.EmployeePayload;
+import cuik.data.pojo.payloads.EmployeePayload;
 import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.Controller;
 import cuik.utilities.Crypto;

@@ -3,11 +3,6 @@ USE `cuik`;
 SET NAMES 'utf8';
 
 INSERT INTO `Employees`
-    (`id`, `name`, `email`, `is_admin`, `password_hash`)
-VALUES
-    ('00000000-0000-0000-0000-000000000000', 'admin', 'admin@cuik.food', 1, '$argon2i$v=19$m=65536,t=10,p=1$yS/ozAZroTl+zQVklkg5Hg$oNf3i23mu9kUnzVCuTnA0Gtlh1LDq4RnpDSR8a2ytvg');
-
-INSERT INTO `Employees`
     (`id`, `created`, `updated`, `name`, `email`, `is_admin`, `password_hash`)
 VALUES
     ('9a0384a7-7bc9-46e3-bf51-87ed5e58c4b0', '2026-09-19 12:49:12', '2026-11-22 00:34:50', 'Estela Mancuso', 'estela.mancuso@cuik.food', 1, '$argon2id$v=19$m=65536,t=3,p=4$ntIyCQBuANUSGcjh7hXFOw$MQ7kjx/QTiiLQRJ8oV+fdkVh7Pp41LN2CEGN4GomFUM'),

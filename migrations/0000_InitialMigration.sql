@@ -68,8 +68,7 @@ CREATE TABLE IF NOT EXISTS `NutritionalFacts` (
 
 CREATE TABLE IF NOT EXISTS `Allergens` (
     `id` VARCHAR(36) PRIMARY KEY,
-    `name` VARCHAR(40) NOT NULL UNIQUE,
-    `description` TEXT
+    `name` VARCHAR(40) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS `MenuItemAllergens` (

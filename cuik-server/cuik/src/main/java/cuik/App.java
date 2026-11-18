@@ -1,10 +1,13 @@
 package cuik;
 
 import cuik.adapters.MenuAdapter;
+import cuik.controllers.AllergenController;
 import cuik.controllers.AuthController;
 import cuik.controllers.EmployeeController;
 import cuik.controllers.MenuController;
+import cuik.controllers.MenuItemController;
 import cuik.controllers.UserController;
+import cuik.data.AllergenRepository;
 import cuik.data.EmployeeRepository;
 import cuik.data.MenuItemRepository;
 import cuik.data.MenuRepository;
@@ -27,10 +30,12 @@ public class App {
 
         var server = new ServerBuilder()
                 .usePort(8080)
+                .useController(AllergenController.class)
+                .useController(AuthController.class)
                 .useController(UserController.class)
                 .useController(EmployeeController.class)
-                .useController(AuthController.class)
                 .useController(MenuController.class)
+                .useController(MenuItemController.class)
                 .useStaticFiles()
                 .build();
 
@@ -59,6 +64,7 @@ public class App {
         Container.register(SqlClient.class);
 
         // repos
+        Container.register(AllergenRepository.class);
         Container.register(UserRepository.class);
         Container.register(EmployeeRepository.class);
         Container.register(MenuRepository.class);
@@ -69,8 +75,10 @@ public class App {
 
         // controllers
         Container.register(AuthController.class);
+        Container.register(AllergenController.class);
         Container.register(UserController.class);
         Container.register(EmployeeController.class);
         Container.register(MenuController.class);
+        Container.register(MenuItemController.class);
     }
 }

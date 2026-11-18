@@ -4,7 +4,7 @@ import { CircleCheck, CircleX, SquarePen, Trash } from "lucide-preact";
 import { Employee, employeeService } from "../api";
 
 import { DataTable } from "../components/DataTable";
-import { fuzzyFilter } from "../utils/String";
+import { fuzzyFilter, normalizeString } from "../utils/String";
 import { SquareButton } from "../components/SquareButton";
 
 import { EditEmployee } from "./EmployeesPage.Edit";
@@ -19,7 +19,10 @@ export function EmployeesPage() {
 
     useEffect(() => {
         employeeService.fetch()
-            .then(v => setData(v))
+            .then(v => {
+                const sorted = v.sort((a, b) => normalizeString(a.name) < normalizeString(b.name) ? -1 : 1);
+                setData(sorted);
+            })
             .catch(console.error);
     }, []);
 

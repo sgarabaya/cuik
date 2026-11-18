@@ -6,7 +6,7 @@ import { Navbar } from './components/Navbar';
 
 import { UsersPage } from './pages/UsersPage';
 import { EmployeesPage } from './pages/EmployeesPage';
-const MenusPage = (props: any) => <h1>Menus</h1>;
+import { MenusPage } from './pages/MenusPage';
 const TablesPage = (props: any) => <h1>Tables</h1>;
 const PurchasesPage = (props: any) => <h1>Purchases</h1>;
 
