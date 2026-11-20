@@ -8,6 +8,7 @@ import cuik.data.pojo.payloads.UserPayload;
 import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.*;
 import cuik.utilities.Crypto;
+import cuik.utilities.Messages;
 import cuik.utilities.Strings;
 import cuik.utilities.Transform;
 
@@ -22,7 +23,7 @@ public class UserController extends CrudController<User, UserRepository> {
         var payload = Transform.fromJsonElement(element, UserPayload.class);
 
         if (payload.password() == null || payload.password().isBlank())
-            throw new CuikValidationException("La contrasena es requerida");
+            throw new CuikValidationException(Messages.PasswordIsRequired);
 
         var user = new User();
         user.setName(payload.name());

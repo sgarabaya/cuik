@@ -17,6 +17,12 @@ export function fuzzyFilter<T>(entries: T[], keys: string[], query: string): T[]
     return results.map(r => r.item);
 }
 
+// Localization
+export const formatPrice = (price: number): string =>
+    `$ ${new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(price)}`;
+
+export const formatDate = (date: Date): string => Intl.DateTimeFormat('es-AR').format(date);
+
 export function normalizeString(str: string): string {
     return str
         .normalize("NFD")
@@ -24,3 +30,9 @@ export function normalizeString(str: string): string {
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "");
 }
+
+export const compareText = (a: string, b: string): number => {
+    const left = normalizeString(a);
+    const right = normalizeString(b);
+    return left < right ? -1 : left > right ? 1 : 0;
+};

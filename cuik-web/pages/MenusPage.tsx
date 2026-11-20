@@ -13,7 +13,7 @@ import {
     Sesame, Shellfish, Soy
 } from '../components/icons';
 
-import { normalizeString } from '../utils/String';
+import { normalizeString } from '../utilities';
 
 import { MenuItemEdit } from './MenuItemEdit';
 import { MenuEdit } from './MenuEdit';
@@ -93,11 +93,10 @@ export function MenusPage() {
                             <section class="controls" style="margin-bottom:.5rem">
                                 <div>
                                     <h3>Menu: {selectedMenu.name}</h3>
-                                    <input type="checkbox" checked={true} />
                                 </div>
                                 <div style="display:flex;gap:.5rem">
-                                    <button type="button" onClick={() => handleEditMenu(selectedMenu)}>Editar</button>
-                                    <button type="button" class="success" onClick={handleCreateItem}>Crear Item</button>
+                                    <button onClick={() => handleEditMenu(selectedMenu)}>Editar</button>
+                                    <button class="success" onClick={handleCreateItem}>Crear Item</button>
                                 </div>
                             </section>
                             <DataTable

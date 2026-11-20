@@ -7,7 +7,7 @@ import { EditUser } from './UsersPage.Edit';
 
 import { SquareButton } from '../components/SquareButton';
 import { DataTable } from '../components/DataTable';
-import { fuzzyFilter, normalizeString } from '../utils/String';
+import { fuzzyFilter, normalizeString } from '../utilities';
 
 export function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -61,7 +61,7 @@ export function UsersPage() {
                             value={search}
                             onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
                         />
-                        <button type="button" onClick={handleNewUser}>Crear</button>
+                        <button onClick={handleNewUser}>Crear</button>
                     </div>
                 </header>
                 <div style="padding:.5rem">

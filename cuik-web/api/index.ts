@@ -1,5 +1,13 @@
-import { request } from './common';
+import { getToken, request, setToken } from './common';
+import { toRole, type Role } from '../auth/roles';
 import type { User, Employee, BaseEntity, Allergen, Menu, MenuItem } from './models';
+
+export interface LoginInfo {
+    id: string;
+    name: string;
+    email: string;
+    role: Role;
+}
 
 //Base CRUD client
 abstract class Service<T extends BaseEntity> {
@@ -40,7 +48,41 @@ class MenuItemService extends Service<MenuItem> {
     constructor() { super("menu_items"); }
 }
 
+const parseToken = (token: string): LoginInfo | null => {
+    try {
+        const { id, name, email, role } = JSON.parse(atob(token.split('.')[1]));
+        return { id, name, email, role: toRole(role) };
+    } catch {
+        return null;
+    }
+};
+
+class AuthService {
+    isLoggedIn() {
+        const value = getToken();
+
+        return value && value.length > 0;
+    }
+
+    getUser(): LoginInfo | null {
+        const token = getToken();
+
+        return token ? parseToken(token) : null;
+    }
+
+    async login(email: string, password: string) {
+        const token = await request<string>('auth/login', { method: 'POST', body: { email, password } });
+        setToken(token);
+        return true;
+    }
+
+    logout() {
+        setToken(null);
+    }
+}
+
 // exports
+export const authService = new AuthService();
 export const userService = new UserService();
 export const employeeService = new EmployeeService();
 export const allergenService = new AllergenService();

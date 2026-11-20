@@ -8,6 +8,7 @@ import cuik.data.pojo.payloads.EmployeePayload;
 import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.Controller;
 import cuik.utilities.Crypto;
+import cuik.utilities.Messages;
 import cuik.utilities.Strings;
 import cuik.utilities.Transform;
 
@@ -22,7 +23,7 @@ public class EmployeeController extends CrudController<Employee, EmployeeReposit
         var payload = Transform.fromJsonElement(element, EmployeePayload.class);
 
         if (payload.password() == null || payload.password().isBlank())
-            throw new CuikValidationException("La contrasena es requerida");
+            throw new CuikValidationException(Messages.PasswordIsRequired);
 
         var employee = new Employee();
         employee.setName(payload.name());

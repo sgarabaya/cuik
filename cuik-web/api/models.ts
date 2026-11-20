@@ -1,6 +1,6 @@
 export interface BaseEntity {
     id: string;
-    created: Date;
+    created?: Date;
 }
 
 export interface User extends BaseEntity {

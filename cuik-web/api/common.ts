@@ -1,6 +1,6 @@
 const BASE: string = '/api';
 const TIMEOUT_MS = 10_000;
-const TOKEN_KEY = 'token';
+const TOKEN_KEY = 'cuik.token';
 
 export class ApiError extends Error {
     constructor(public status: number, message: string) {

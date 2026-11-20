@@ -4,7 +4,7 @@ import { CircleCheck, CircleX, SquarePen, Trash } from "lucide-preact";
 import { Employee, employeeService } from "../api";
 
 import { DataTable } from "../components/DataTable";
-import { fuzzyFilter, normalizeString } from "../utils/String";
+import { fuzzyFilter, normalizeString } from "../utilities";
 import { SquareButton } from "../components/SquareButton";
 
 import { EditEmployee } from "./EmployeesPage.Edit";
@@ -75,7 +75,7 @@ export function EmployeesPage() {
                             </select>
                         </div>
 
-                        <button type="button" onClick={handleCreate}>Crear</button>
+                        <button onClick={handleCreate}>Crear</button>
                     </div>
                 </header>
                 <div style="padding:.5rem">

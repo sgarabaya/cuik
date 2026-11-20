@@ -1,9 +1,7 @@
 package cuik.controllers;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -21,6 +19,7 @@ import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Post;
 import cuik.utilities.Configuration;
 import cuik.utilities.Crypto;
+import cuik.utilities.Messages;
 
 @Controller("/api/auth")
 public class AuthController extends BaseController {
@@ -39,27 +38,19 @@ public class AuthController extends BaseController {
             var jwt = JWT.create();
             jwt.withExpiresAt(LocalDateTime.now().plusDays(5).toInstant(ZoneOffset.UTC));
 
+            jwt.withClaim("id", entity.getId().toString());
+            jwt.withClaim("email", entity.getEmail());
+            jwt.withClaim("name", entity.getName());
+
             if (entity.getClass() == Employee.class) {
                 jwt.withClaim("role", ((Employee) entity).getIsAdmin() ? "admin" : "employee");
             } else
                 jwt.withClaim("role", "user");
+
             return jwt.sign(algorithm);
         }
 
-        return null;
-    }
-
-    @Post("internal/login")
-    public String loginEmployee(@FromBody AuthRequest request) throws Exception {
-        var email = request.email();
-        var password = request.password();
-
-        var employee = employeeRepository.findByEmail(email);
-
-        if (employee == null) // el empleado no existe
-            throw new CuikValidationException("Login invalido");
-
-        return authenticate(employee, password);
+        throw new CuikValidationException(Messages.InvalidLogin);
     }
 
     @Post("login")
@@ -67,12 +58,22 @@ public class AuthController extends BaseController {
         var email = request.email();
         var password = request.password();
 
-        var user = userRepository.findByEmail(email);
+        // si el email tiene cuik.food, es un empleado
+        if (email.endsWith("@cuik.food")) {
+            var employee = employeeRepository.findByEmail(email);
 
-        if (user == null) // el usuario no existe
-            throw new CuikValidationException("El usuario no esta registrado");
+            if (employee == null) // el empleado no existe
+                throw new CuikValidationException(Messages.UserDoesntExist);
 
-        return authenticate(user, password);
+            return authenticate(employee, password);
+        } else {
+            var user = userRepository.findByEmail(email);
+
+            if (user == null) // el usuario no existe
+                throw new CuikValidationException(Messages.UserDoesntExist);
+
+            return authenticate(user, password);
+        }
     }
 
     @Post("register")
@@ -81,7 +82,7 @@ public class AuthController extends BaseController {
         var user = userRepository.findByEmail(request.email());
 
         if (user != null) // el usuario ya esta registrado
-            throw new CuikValidationException("El usuario ya esta registrado");
+            throw new CuikValidationException(Messages.UserAlreadyExists);
 
         user = new User();
         user.setName(request.name());
