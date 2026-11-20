@@ -19,9 +19,21 @@ export function fuzzyFilter<T>(entries: T[], keys: string[], query: string): T[]
 
 // Localization
 export const formatPrice = (price: number): string =>
-    `$ ${new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(price)}`;
+    `$${new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(price)}`;
 
-export const formatDate = (date: Date): string => Intl.DateTimeFormat('es-AR').format(date);
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const parseApiDate = (value: string | Date): Date =>
+    typeof value === 'string'
+        ? new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(value) ? value : `${value}Z`)
+        : value;
+
+export function formatTimestamp(value: string | Date): string {
+    const d = parseApiDate(value);
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+        + `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
 
 export function normalizeString(str: string): string {
     return str

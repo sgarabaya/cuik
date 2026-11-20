@@ -23,6 +23,7 @@ export function LoginPage() {
         try {
             await login(email, password);
             navigate('/');
+            window.location.reload();
         } catch (err) {
             console.error(err);
             setError(String(err));

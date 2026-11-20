@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { CirclePower, Square, SquareCheck, SquarePen, Trash } from 'lucide-preact';
+import { Check, SquarePen, Trash, X } from 'lucide-preact';
 
 import { Menu, menuService } from '../api';
 import { Allergen, MenuItem } from '../api/models';
@@ -18,6 +18,7 @@ import { normalizeString } from '../utilities';
 import { MenuItemEdit } from './MenuItemEdit';
 import { MenuEdit } from './MenuEdit';
 
+// TODO: implementar alergenos
 const Allergens = ({ items }: { items: Allergen[] }) => {
     return <div style="display:flex;flex-flow:wrap;max-width:5rem;justify-content:space-evenly">
         <Beef /><Eggs /><Gluten />
@@ -41,7 +42,6 @@ export function MenusPage() {
             })
             .catch(console.error);
     }, []);
-
 
     const [isEditingMenu, setIsEditingMenu] = useState<boolean>(false);
     const [isEditingItem, setIsEditingItem] = useState<boolean>(false);
@@ -81,7 +81,7 @@ export function MenusPage() {
                             onClick={() => setSelectedMenu(e)}
                         >
                             <span class="align-center">
-                                {e.name} <CirclePower class={"small " + (e.isActive ? 'green-text' : 'red-text')} />
+                                {e.name}
                             </span>
                         </li>)}
                         <li class="plus" onClick={handleCreateMenu}>+</li>
@@ -109,7 +109,7 @@ export function MenusPage() {
                                     { header: 'Nombre', key: 'name' },
                                     { header: 'Categoria', key: 'category' },
                                     { header: 'Precio', key: e => <span class="number">${e.price}</span> },
-                                    { header: 'Disponible', key: e => e.available ? <SquareCheck /> : <Square />, class: 'center' },
+                                    { header: 'Disponible', key: e => e.available ? <Check style="color:var(--success)" /> : <X style="color:var(--danger)" />, class: 'center' },
                                     { header: 'Alérgenos', key: e => <Allergens items={e.allergens ?? []} />, class: 'center' }
                                 ]}
                             />

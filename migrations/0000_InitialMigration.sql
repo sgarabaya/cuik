@@ -78,3 +78,21 @@ CREATE TABLE IF NOT EXISTS `MenuItemAllergens` (
     FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems` (`id`) ON DELETE CASCADE,
     FOREIGN KEY (`allergen_id`) REFERENCES `Allergens` (`id`) ON DELETE RESTRICT
 );
+
+CREATE TABLE IF NOT EXISTS `Purchases` (
+    `id` VARCHAR(36) PRIMARY KEY,
+    `created` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `user_id` VARCHAR(36) NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `PurchaseItems` (
+    `id` VARCHAR(36) PRIMARY KEY,
+    `purchase_id` VARCHAR(36) NOT NULL,
+    `menu_item_id` VARCHAR(36) NOT NULL,
+    `price` FLOAT NOT NULL,
+    `units` INT NOT NULL,
+    FOREIGN KEY (`purchase_id`) REFERENCES `Purchases`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`menu_item_id`) REFERENCES `MenuItems`(`id`) ON DELETE CASCADE
+);

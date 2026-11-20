@@ -39,8 +39,13 @@ export function UsersPage() {
         if (!confirm(`Eliminar a ${user.name}?`))
             return;
 
-        if (await userService.delete(user))
+        try {
+            await userService.delete(user);
             window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert('No se pudo eliminar el usuario');
+        }
     };
 
     const closeDialog = () => {

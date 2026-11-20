@@ -106,6 +106,9 @@ public abstract class AutoMapper {
 
                     if (field.getType() == UUID.class) {
                         field.set(obj, UUID.fromString((String) value));
+                    } else if (value instanceof Number n
+                            && (field.getType() == int.class || field.getType() == Integer.class)) {
+                        field.set(obj, n.intValue());
                     } else {
                         field.set(obj, value);
                     }

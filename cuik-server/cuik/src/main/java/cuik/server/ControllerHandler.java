@@ -1,10 +1,13 @@
 package cuik.server;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jetty.http.HttpMethod;
 
@@ -24,6 +27,8 @@ public class ControllerHandler implements RouteHandler {
     private final HttpMethod httpMethod;
     private final String path;
 
+    private final Field contextField;
+
     private final boolean isView;
     private final List<Tuple3<String, Class<?>, Boolean>> params;
 
@@ -32,6 +37,8 @@ public class ControllerHandler implements RouteHandler {
         this.method = method;
         this.httpMethod = httpMethod;
         this.path = path;
+
+        contextField = getContextField(controller);
 
         this.params = new ArrayList<Tuple3<String, Class<?>, Boolean>>();
 
@@ -48,6 +55,20 @@ public class ControllerHandler implements RouteHandler {
         this.isView = method.isAnnotationPresent(View.class);
     }
 
+    public static Field getContextField(Class<?> type) {
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            try {
+                var field = current.getDeclaredField("context");
+                field.setAccessible(true);
+                return field;
+            } catch (NoSuchFieldException ignored) {
+                // not found, keep checking the cycle
+            }
+        }
+
+        return null;
+    }
+
     public void register(Router router) {
         router.addRoute(httpMethod.asString(), path, this);
     }
@@ -61,6 +82,7 @@ public class ControllerHandler implements RouteHandler {
                     context.getPath());
 
             var ctl = Container.build(controller);
+            contextField.set(ctl, context);
 
             var paramValues = new Object[params.size()];
 
@@ -84,7 +106,6 @@ public class ControllerHandler implements RouteHandler {
             } else {
                 context.respond(method.invoke(ctl, paramValues));
             }
-
         } catch (CuikValidationException ex) {
             CuikLogger.error("Validation Error: %s", ex.getMessage());
             context.respond(ex.getErrorMessage(), ex.getStatus());

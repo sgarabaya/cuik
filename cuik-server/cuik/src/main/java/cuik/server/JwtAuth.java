@@ -12,7 +12,6 @@ import cuik.utilities.Configuration;
 import cuik.utilities.Messages;
 
 public abstract class JwtAuth {
-
     private static final JWTVerifier VERIFIER = JWT
             .require(Algorithm.HMAC512(Configuration.getJwtSecret()))
             .build();
@@ -20,13 +19,8 @@ public abstract class JwtAuth {
     private JwtAuth() {
     }
 
-    public static void authorize(HttpContext context, Role required) throws CuikValidationException {
-        if (required == null)
-            return;
-
-        // Admin > Employee > User > Guest (no auth)
-        var role = Role.Guest;
-        var token = context.getBearerToken();
+    public static Token parseToken(String token) throws CuikValidationException {
+        var role = Role.Guest; // Admin > Employee > User > Guest (no auth)
 
         if (token != null) {
             DecodedJWT jwt;
@@ -39,13 +33,29 @@ public abstract class JwtAuth {
             role = Role.fromClaim(jwt.getClaim("role").asString());
             if (role == null)
                 throw new CuikValidationException(Messages.InvalidToken, 401);
+
+            var id = jwt.getClaim("id").asString();
+            var email = jwt.getClaim("email").asString();
+
+            return new Token(role, id, email);
         }
 
-        if (role.satisfies(required))
+        return new Token(role, null, null);
+    }
+
+    public static void authorize(HttpContext context, Role required) throws CuikValidationException {
+        if (required == null)
             return;
 
-        if (token == null)
+        var token = context.getBearerToken();
+
+        if (token == null && required != Role.Guest)
             throw new CuikValidationException(Messages.AuthenticationRequired, 401);
+
+        var parsed = parseToken(token);
+
+        if (parsed.role().satisfies(required))
+            return;
 
         throw new CuikValidationException(Messages.InsufficientPermissions, 403);
     }

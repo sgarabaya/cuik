@@ -6,11 +6,13 @@ import cuik.controllers.AuthController;
 import cuik.controllers.EmployeeController;
 import cuik.controllers.MenuController;
 import cuik.controllers.MenuItemController;
+import cuik.controllers.PurchaseController;
 import cuik.controllers.UserController;
 import cuik.data.AllergenRepository;
 import cuik.data.EmployeeRepository;
 import cuik.data.MenuItemRepository;
 import cuik.data.MenuRepository;
+import cuik.data.PurchaseRepository;
 import cuik.data.SqlClient;
 import cuik.data.UserRepository;
 import cuik.server.ServerBuilder;
@@ -36,6 +38,7 @@ public class App {
                 .useController(EmployeeController.class)
                 .useController(MenuController.class)
                 .useController(MenuItemController.class)
+                .useController(PurchaseController.class)
                 .useStaticFiles()
                 .build();
 
@@ -69,6 +72,7 @@ public class App {
         Container.register(EmployeeRepository.class);
         Container.register(MenuRepository.class);
         Container.register(MenuItemRepository.class);
+        Container.register(PurchaseRepository.class);
 
         // adapters
         Container.register(MenuAdapter.class);
@@ -80,5 +84,6 @@ public class App {
         Container.register(EmployeeController.class);
         Container.register(MenuController.class);
         Container.register(MenuItemController.class);
+        Container.register(PurchaseController.class);
     }
 }

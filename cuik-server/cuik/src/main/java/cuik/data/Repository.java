@@ -73,20 +73,6 @@ public abstract class Repository<T extends BaseEntity> {
                 Configuration.getDatabasePassword());
     }
 
-    protected List<T> queryMultiple(Function<Statement, List<T>> fn, String query, Object... params) throws Exception {
-        try (var conn = connect();
-                var stmt = preparedStatement(conn, query, params)) {
-            if (stmt.execute())
-                return fn.apply(stmt);
-            return new ArrayList<T>();
-        }
-    }
-
-    protected <A, B, C> List<A> queryMultiple(Class<A> classA, Class<B> classB, Class<C> classC, String query,
-            Object... params) {
-        return null;
-    }
-
     protected <R> List<R> queryRaw(Class<R> classT, String query, Object... params) throws Exception {
         try (var conn = connect();
                 var stmt = preparedStatement(conn, query, params);
@@ -140,6 +126,12 @@ public abstract class Repository<T extends BaseEntity> {
     }
 
     public UUID create(T obj) throws Exception {
+        try (var conn = connect()) {
+            return create(conn, obj);
+        }
+    }
+
+    public UUID create(Connection conn, T obj) throws Exception {
         var columns = new HashMap<String, Object>();
 
         for (var column : AutoMapper.getColumns(getModelClass())) {
@@ -148,23 +140,21 @@ public abstract class Repository<T extends BaseEntity> {
                 columns.put(column.name(), value);
         }
 
-        try (var conn = connect()) {
-            var id = UUID.randomUUID();
+        var id = UUID.randomUUID();
 
-            obj.setId(id);
-            columns.put("id", id);
+        obj.setId(id);
+        columns.put("id", id);
 
-            var columnNames = String.join(",", columns.keySet().stream().map(k -> String.format("`%s`", k)).toList());
-            var valuePlaceholders = String.join(",", columns.keySet().stream().map(c -> "?").toList());
-            var query = String.format(
-                    "INSERT INTO %s (%s) VALUES (%s)",
-                    getTableName(), columnNames, valuePlaceholders);
+        var columnNames = String.join(",", columns.keySet().stream().map(k -> String.format("`%s`", k)).toList());
+        var valuePlaceholders = String.join(",", columns.keySet().stream().map(c -> "?").toList());
+        var query = String.format(
+                "INSERT INTO %s (%s) VALUES (%s)",
+                getTableName(), columnNames, valuePlaceholders);
 
-            try (var stmt = preparedStatement(conn, query, columns.values().toArray())) {
-                if (stmt.executeUpdate() != 1)
-                    throw new CuikInternalException(
-                            String.format(Messages.CouldNotCreateEntity, getModelClass().getSimpleName()));
-            }
+        try (var stmt = preparedStatement(conn, query, columns.values().toArray())) {
+            if (stmt.executeUpdate() != 1)
+                throw new CuikInternalException(
+                        String.format(Messages.CouldNotCreateEntity, getModelClass().getSimpleName()));
         }
 
         return obj.getId();

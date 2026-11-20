@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 
 import { useAuth } from '../auth/AuthContext';
-import { menuService, type Menu, type MenuItem } from '../api';
+import { menuService, purchaseService, type Menu, type MenuItem } from '../api';
 
 import {
     addToCart,
@@ -13,6 +13,7 @@ import {
 import { MenuHeader } from './MenuView.Header';
 import { MenuContent } from './MenuView.Content';
 import { MenuCart } from './MenuView.Cart';
+import { navigate } from 'wouter-preact/use-hash-location';
 
 export function MenuView() {
     const { user } = useAuth();
@@ -45,10 +46,26 @@ export function MenuView() {
     const updateItemQuantity = (id: string, delta: number) =>
         setCart(lines => changeQuantity(lines, id, delta));
 
-    const placeOrder = () => {
-        //TODO: llamar POST /api/purchase
-        setCart([]);
-        setOrderPlaced(true);
+    const placeOrder = async () => {
+        if (!user || cart.length === 0) return;
+
+        const payload = {
+            userId: user.id,
+            items: cart.map(({ item, quantity }) => ({
+                menuItemId: item.id,
+                price: item.price,
+                units: quantity
+            }))
+        };
+
+        try {
+            await purchaseService.create(payload);
+            setCart([]);
+            setOrderPlaced(true);
+            setTimeout(() => navigate('/purchases'), 500);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (

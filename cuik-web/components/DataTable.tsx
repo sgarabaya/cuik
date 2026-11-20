@@ -9,7 +9,7 @@ interface Column<T> {
 interface DataTableProps<T extends { id: string }> {
     data: T[];
     columns: Column<T>[];
-    renderActions: (item: T) => JSX.Element;
+    renderActions: null | ((item: T) => JSX.Element);
 }
 
 export function DataTable<T extends { id: string }>(props: DataTableProps<T>) {
@@ -23,7 +23,7 @@ export function DataTable<T extends { id: string }>(props: DataTableProps<T>) {
                         {columns.map(col => (
                             <th key={typeof col.key === 'string' ? col.key : col.header}>{col.header}</th>
                         ))}
-                        <th>Acciones</th>
+                        {renderActions && <th>Acciones</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -34,7 +34,7 @@ export function DataTable<T extends { id: string }>(props: DataTableProps<T>) {
                                     {typeof col.key === 'function' ? col.key(item) : (item[col.key as keyof T] as string)}
                                 </td>
                             ))}
-                            <td>{renderActions(item)}</td>
+                            {renderActions && <td>{renderActions(item)}</td>}
                         </tr>
                     ))}
                 </tbody>

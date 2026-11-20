@@ -46,3 +46,22 @@ export interface Menu extends BaseEntity {
     isActive: boolean;
     items: MenuItem[];
 }
+
+export interface Purchase extends BaseEntity {
+    userId: string;
+    userName: string;
+    userEmail: string;
+    items: number;
+    total: number;
+}
+
+export interface PurchaseItem {
+    menuItemId: string;
+    price: number;
+    units: number;
+}
+
+export interface PurchasePayload {
+    userId: string;
+    items: PurchaseItem[];
+}

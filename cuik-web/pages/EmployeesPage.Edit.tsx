@@ -31,6 +31,7 @@ export const EditEmployee = (props: { entry?: Employee, close: Function }) => {
         }
         else {
             entry.password = password;
+            entry.isAdmin = isAdmin;
             await employeeService.create(entry);
         }
 

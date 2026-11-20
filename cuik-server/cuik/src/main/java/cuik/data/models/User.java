@@ -3,7 +3,6 @@ package cuik.data.models;
 import cuik.data.Column;
 
 public class User extends BaseEntity {
-
     @Column
     private String name;
 

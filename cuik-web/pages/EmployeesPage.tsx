@@ -33,8 +33,14 @@ export function EmployeesPage() {
     const handleDelete = async (entry: Employee) => {
         if (!confirm(`Eliminar a ${entry.name}?`))
             return;
-        if (await employeeService.delete(entry))
+
+        try {
+            await employeeService.delete(entry);
             window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert('No se pudo eliminar el empleado');
+        }
     };
 
     const handleSetRole = (ev: InputEvent) => {
