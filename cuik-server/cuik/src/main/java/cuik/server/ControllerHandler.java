@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.eclipse.jetty.http.HttpMethod;
 
-import cuik.exceptions.CuikInternalException;
 import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.View;
@@ -72,7 +71,7 @@ public class ControllerHandler implements RouteHandler {
                     if (context.isJson())
                         paramValues[i] = context.parseBody(param.b());
                     else
-                        throw new CuikInternalException(Messages.ShouldHaveBeenJson);
+                        throw new CuikValidationException(Messages.UnsupportedMediaType, 415);
                 } else {
                     System.out.println("Param: " + param.a());
                     System.out.println(context.getQueryParam(param.a()));
@@ -86,6 +85,9 @@ public class ControllerHandler implements RouteHandler {
                 context.respond(method.invoke(ctl, paramValues));
             }
 
+        } catch (CuikValidationException ex) {
+            CuikLogger.error("Validation Error: %s", ex.getMessage());
+            context.respond(ex.getErrorMessage(), ex.getStatus());
         } catch (InvocationTargetException ex) {
             var inner = ex.getCause();
 

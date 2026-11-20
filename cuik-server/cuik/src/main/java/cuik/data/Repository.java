@@ -32,33 +32,38 @@ public abstract class Repository<T extends BaseEntity> {
             String query,
             Object... args) throws Exception {
         var statement = conn.prepareStatement(query);
-        for (var i = 0; i < args.length; i += 1) {
-            switch (args[i].getClass().getSimpleName()) {
-                case "Boolean":
-                    statement.setBoolean(i + 1, (boolean) args[i]);
-                    break;
-                case "Integer":
-                    statement.setInt(i + 1, (int) args[i]);
-                    break;
-                case "Long":
-                    statement.setLong(i + 1, (long) args[i]);
-                    break;
-                case "Double":
-                    statement.setDouble(i + 1, (double) args[i]);
-                    break;
-                case "Float":
-                    statement.setFloat(i + 1, (float) args[i]);
-                    break;
-                case "String":
-                    statement.setString(i + 1, (String) args[i]);
-                    break;
-                case "UUID":
-                    statement.setString(i + 1, args[i].toString());
-                    break;
+        try {
+            for (var i = 0; i < args.length; i += 1) {
+                switch (args[i].getClass().getSimpleName()) {
+                    case "Boolean":
+                        statement.setBoolean(i + 1, (boolean) args[i]);
+                        break;
+                    case "Integer":
+                        statement.setInt(i + 1, (int) args[i]);
+                        break;
+                    case "Long":
+                        statement.setLong(i + 1, (long) args[i]);
+                        break;
+                    case "Double":
+                        statement.setDouble(i + 1, (double) args[i]);
+                        break;
+                    case "Float":
+                        statement.setFloat(i + 1, (float) args[i]);
+                        break;
+                    case "String":
+                        statement.setString(i + 1, (String) args[i]);
+                        break;
+                    case "UUID":
+                        statement.setString(i + 1, args[i].toString());
+                        break;
+                }
             }
-        }
 
-        return statement;
+            return statement;
+        } catch (Exception ex) {
+            statement.close();
+            throw ex;
+        }
     }
 
     protected Connection connect() throws Exception {
@@ -69,12 +74,12 @@ public abstract class Repository<T extends BaseEntity> {
     }
 
     protected List<T> queryMultiple(Function<Statement, List<T>> fn, String query, Object... params) throws Exception {
-        var conn = connect();
-        var stmt = preparedStatement(conn, query, params);
-
-        if (stmt.execute())
-            return fn.apply(stmt);
-        return new ArrayList<T>();
+        try (var conn = connect();
+                var stmt = preparedStatement(conn, query, params)) {
+            if (stmt.execute())
+                return fn.apply(stmt);
+            return new ArrayList<T>();
+        }
     }
 
     protected <A, B, C> List<A> queryMultiple(Class<A> classA, Class<B> classB, Class<C> classC, String query,
@@ -83,20 +88,15 @@ public abstract class Repository<T extends BaseEntity> {
     }
 
     protected <R> List<R> queryRaw(Class<R> classT, String query, Object... params) throws Exception {
-        var conn = connect();
-        try {
-            var stmt = preparedStatement(conn, query, params);
-
+        try (var conn = connect();
+                var stmt = preparedStatement(conn, query, params);
+                var rs = stmt.executeQuery()) {
             var result = new ArrayList<R>();
 
-            var rs = stmt.executeQuery();
-            while (rs.next()) {
+            while (rs.next())
                 result.add(AutoMapper.map(classT, rs));
-            }
 
             return result;
-        } finally {
-            conn.close();
         }
     }
 
@@ -105,26 +105,19 @@ public abstract class Repository<T extends BaseEntity> {
     }
 
     protected T querySingle(String query, Object... params) throws Exception {
-        var conn = connect();
-        try {
-            var stmt = preparedStatement(conn, query, params);
-            var rs = stmt.executeQuery();
-            if (rs.next()) {
+        try (var conn = connect();
+                var stmt = preparedStatement(conn, query, params);
+                var rs = stmt.executeQuery()) {
+            if (rs.next())
                 return AutoMapper.map(getModelClass(), rs);
-            }
             return null;
-        } finally {
-            conn.close();
         }
     }
 
     protected int execute(String query, Object... params) throws Exception {
-        var conn = connect();
-        try {
-            var stmt = preparedStatement(conn, query, params);
+        try (var conn = connect();
+                var stmt = preparedStatement(conn, query, params)) {
             return stmt.executeUpdate();
-        } finally {
-            conn.close();
         }
     }
 

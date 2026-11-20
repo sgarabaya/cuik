@@ -20,6 +20,7 @@ import cuik.server.annotations.Post;
 import cuik.utilities.Configuration;
 import cuik.utilities.Crypto;
 import cuik.utilities.Messages;
+import cuik.utilities.validation.Validator;
 
 @Controller("/api/auth")
 public class AuthController extends BaseController {
@@ -55,8 +56,13 @@ public class AuthController extends BaseController {
 
     @Post("login")
     public String login(@FromBody AuthRequest request) throws Exception {
+        Validator.of(request, "solicitud").notNull().check();
+
         var email = request.email();
         var password = request.password();
+
+        Validator.of(email, "email").notNull().notBlank().email().check();
+        Validator.of(password, "contraseña").notNull().notBlank().check();
 
         // si el email tiene cuik.food, es un empleado
         if (email.endsWith("@cuik.food")) {
@@ -79,6 +85,12 @@ public class AuthController extends BaseController {
     @Post("register")
     public RegisterResponse register(@FromBody RegisterRequest request)
             throws Exception {
+        Validator.of(request, "solicitud").notNull().check();
+
+        Validator.of(request.name(), "nombre").notNull().notBlank().lengthBetween(2, 256).check();
+        Validator.of(request.email(), "email").notNull().notBlank().email().maxLength(256).check();
+        Validator.of(request.password(), "contraseña").notNull().notBlank().lengthBetween(8, 128).check();
+
         var user = userRepository.findByEmail(request.email());
 
         if (user != null) // el usuario ya esta registrado

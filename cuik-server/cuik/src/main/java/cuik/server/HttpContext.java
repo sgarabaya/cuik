@@ -1,7 +1,7 @@
 package cuik.server;
 
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -14,14 +14,17 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.Callback;
 
+import cuik.exceptions.CuikValidationException;
+import cuik.utilities.CuikLogger;
+import cuik.utilities.Messages;
 import cuik.utilities.Transform;
 
 public class HttpContext {
-
     private final Request request;
     private final Response response;
     private final Callback callback;
     private final Map<String, String> params;
+    private final Map<String, String> queryParams;
 
     public final Logger logger;
 
@@ -33,7 +36,7 @@ public class HttpContext {
         this.callback = callback;
 
         this.params = new HashMap<String, String>(params);
-        this.params.putAll(getQueryParams());
+        this.queryParams = getQueryParams();
     }
 
     public String getMethod() {
@@ -48,23 +51,36 @@ public class HttpContext {
         var queryParams = new HashMap<String, String>();
         var query = request.getHttpURI().getQuery();
         if (query != null) {
-            var pairs = query.split("&");
-            for (String pair : pairs) {
-                var keyValue = pair.split("=");
-                if (keyValue.length > 1) {
-                    queryParams.put(keyValue[0], keyValue[1]);
-                }
+            for (String pair : query.split("&")) {
+                var keyValue = pair.split("=", 2);
+                if (keyValue.length > 1)
+                    queryParams.put(decode(keyValue[0]), decode(keyValue[1]));
             }
         }
         return queryParams;
     }
 
+    private static String decode(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException ex) {
+            return value; // devolvemos igual
+        }
+    }
+
+    private String getParam(String key) {
+        if (params.containsKey(key))
+            return params.get(key);
+        return queryParams.get(key);
+    }
+
     public <T> T getQueryParam(String key, Class<T> classT) {
-        return Transform.fromJson(params.getOrDefault(key, ""), classT);
+        var value = getParam(key);
+        return Transform.fromJson(value == null ? "" : value, classT);
     }
 
     public String getQueryParam(String key) {
-        return params.getOrDefault(key, null);
+        return getParam(key);
     }
 
     public String getHeader(String name) {
@@ -86,11 +102,22 @@ public class HttpContext {
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
-        if (request.getLength() > 10 * 1024 * 1024)
-            return null; // if the content-length is >10M, reject it
-
-        var json = Content.Source.asString(request, StandardCharsets.UTF_8);
+        var json = new String(readBody(), StandardCharsets.UTF_8);
         return Transform.fromJson(json, classT);
+    }
+
+    private byte[] readBody() throws Exception {
+        try (var input = Content.Source.asInputStream(request);
+                var output = new ByteArrayOutputStream()) {
+            var buffer = new byte[8192];
+            int count;
+            while ((count = input.read(buffer)) != -1) {
+                if (output.size() + count > 10 * 1024 * 1024) // if the content-length is >10M, reject it
+                    throw new CuikValidationException(Messages.BodyTooLarge, 413);
+                output.write(buffer, 0, count);
+            }
+            return output.toByteArray();
+        }
     }
 
     public boolean hasSession() {
@@ -113,11 +140,8 @@ public class HttpContext {
 
     // Respond with an error
     public void respondError(Throwable ex) {
-        var stream = new ByteArrayOutputStream();
-        var pStream = new PrintStream(stream);
-        ex.printStackTrace(pStream);
-        response.setStatus(500);
-        respond(stream.toByteArray());
+        CuikLogger.error(ex);
+        respondError(500, Messages.InternalServerError);
     }
 
     public void respondView(String view) {

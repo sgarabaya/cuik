@@ -28,7 +28,7 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder useStaticFiles() {
+    public ServerBuilder useStaticFiles() throws CuikInternalException {
         var staticHandler = new StaticFileHandler();
         router.setFallback(staticHandler);
         logger.log(

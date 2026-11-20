@@ -1,5 +1,7 @@
 package cuik.utilities;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 enum LogLevel {
@@ -27,8 +29,9 @@ public abstract class CuikLogger {
     }
 
     public static void error(Throwable ex) {
-        var message = ex.getMessage();
-        logsQueue.add(new Log(LogLevel.Error, message));
+        var writer = new StringWriter();
+        ex.printStackTrace(new PrintWriter(writer));
+        logsQueue.add(new Log(LogLevel.Error, writer.toString()));
     }
 
     public static void flush() {

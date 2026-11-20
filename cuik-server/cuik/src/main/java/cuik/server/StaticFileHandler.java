@@ -1,31 +1,29 @@
 package cuik.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import cuik.exceptions.CuikInternalException;
 import cuik.server.router.RouteHandler;
 import cuik.utilities.Configuration;
+import cuik.utilities.Messages;
+import cuik.utilities.Strings;
 
 public class StaticFileHandler implements RouteHandler {
 
     private final String basePath;
-    private final boolean useFileSystem;
     private final Map<String, String> mimeTypes;
 
-    public StaticFileHandler() {
+    public StaticFileHandler() throws CuikInternalException {
         var staticDir = Configuration.getStaticDir();
-        if (staticDir != null && !staticDir.isEmpty()) {
-            this.useFileSystem = true;
-            this.basePath = staticDir;
-        } else {
-            this.useFileSystem = false;
-            var baseResourcePath = "/static";
-            this.basePath = baseResourcePath;
-        }
+
+        if (Strings.isEmpty(staticDir))
+            throw new CuikInternalException(Messages.MissingStaticPathConfig);
+
+        this.basePath = staticDir;
 
         this.mimeTypes = new HashMap<String, String>();
         mimeTypes.put("html", "text/html");
@@ -37,14 +35,6 @@ public class StaticFileHandler implements RouteHandler {
         mimeTypes.put("gif", "image/gif");
         mimeTypes.put("svg", "image/svg+xml");
         mimeTypes.put("ico", "image/x-icon");
-    }
-
-    private byte[] loadResource(String basePath, String resourcePath) throws IOException {
-        var fullResourcePath = basePath + resourcePath;
-        InputStream is = getClass().getResourceAsStream(fullResourcePath);
-        if (is == null)
-            return null;
-        return is.readAllBytes();
     }
 
     private byte[] loadFile(String basePath, String resourcePath) throws IOException {
@@ -81,7 +71,7 @@ public class StaticFileHandler implements RouteHandler {
         }
 
         try {
-            var fileContent = useFileSystem ? loadFile(basePath, requestPath) : loadResource(basePath, requestPath);
+            var fileContent = loadFile(basePath, requestPath);
 
             if (fileContent == null) {
                 context.logger.severe("Error reading static content: " + requestPath);

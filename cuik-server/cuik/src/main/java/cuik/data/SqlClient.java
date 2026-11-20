@@ -11,13 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
 public class SqlClient {
 
-    private static HashMap<Class<?>, Constructor<?>> cache = new HashMap<>();
+    private static final ConcurrentHashMap<Class<?>, Constructor<?>> cache = new ConcurrentHashMap<>();
 
     public Connection connect() throws SQLException {
         return DriverManager.getConnection(
@@ -26,14 +26,15 @@ public class SqlClient {
                 Configuration.getDatabasePassword());
     }
 
-    private Constructor<?> getConstructor(Class<?> classT)
-            throws CuikInternalException {
-        try {
-            if (!cache.containsKey(classT))
-                cache.put(
-                        classT,
-                        classT.getConstructor(ResultSet.class));
+    private Constructor<?> getConstructor(Class<?> classT) throws CuikInternalException {
+        var constructor = cache.get(classT);
 
+        if (constructor != null)
+            return constructor;
+
+        try {
+            constructor = classT.getConstructor(ResultSet.class);
+            cache.putIfAbsent(classT, constructor);
             return cache.get(classT);
         } catch (NoSuchMethodException ex) {
             throw new CuikInternalException(
@@ -47,49 +48,50 @@ public class SqlClient {
             String query,
             Object... parameters) throws SQLException {
         var statement = connection.prepareStatement(query);
-        for (var i = 0; i < parameters.length; i += 1) {
-            switch (parameters[i].getClass().getSimpleName()) {
-                case "Boolean":
-                    statement.setBoolean(i + 1, (boolean) parameters[i]);
-                    break;
-                case "Integer":
-                    statement.setInt(i + 1, (int) parameters[i]);
-                    break;
-                case "Long":
-                    statement.setLong(i + 1, (long) parameters[i]);
-                    break;
-                case "Double":
-                    statement.setDouble(i + 1, (double) parameters[i]);
-                    break;
-                case "Float":
-                    statement.setFloat(i + 1, (float) parameters[i]);
-                    break;
-                case "String":
-                    statement.setString(i + 1, (String) parameters[i]);
-                    break;
+        try {
+            for (var i = 0; i < parameters.length; i += 1) {
+                switch (parameters[i].getClass().getSimpleName()) {
+                    case "Boolean":
+                        statement.setBoolean(i + 1, (boolean) parameters[i]);
+                        break;
+                    case "Integer":
+                        statement.setInt(i + 1, (int) parameters[i]);
+                        break;
+                    case "Long":
+                        statement.setLong(i + 1, (long) parameters[i]);
+                        break;
+                    case "Double":
+                        statement.setDouble(i + 1, (double) parameters[i]);
+                        break;
+                    case "Float":
+                        statement.setFloat(i + 1, (float) parameters[i]);
+                        break;
+                    case "String":
+                        statement.setString(i + 1, (String) parameters[i]);
+                        break;
+                }
             }
-        }
 
-        return statement;
+            return statement;
+        } catch (SQLException ex) {
+            statement.close();
+            throw ex;
+        }
     }
 
     public <T> T querySingle(
             Class<T> classT,
             String query,
             Object... parameters) throws CuikInternalException {
-        try {
-            var connection = connect();
+        try (var connection = connect();
+                var statement = prepareStatement(connection, query, parameters);
+                var resultSet = statement.executeQuery()) {
             var constructor = getConstructor(classT);
-            var statement = prepareStatement(connection, query, parameters);
-            var resultSet = statement.executeQuery();
 
             T result = null;
 
-            if (resultSet.next()) {
+            if (resultSet.next())
                 result = classT.cast(constructor.newInstance(resultSet));
-            }
-
-            connection.close();
 
             return result;
         } catch (SQLException ex) {
@@ -107,18 +109,15 @@ public class SqlClient {
             Class<T> classT,
             String query,
             Object... parameters) throws CuikInternalException {
-        try {
-            var connection = connect();
+        try (var connection = connect();
+                var statement = prepareStatement(connection, query, parameters);
+                var resultSet = statement.executeQuery()) {
             var constructor = getConstructor(classT);
-            var statement = prepareStatement(connection, query, parameters);
-            var resultSet = statement.executeQuery();
 
             var results = new ArrayList<T>();
 
             while (resultSet.next())
                 results.add(classT.cast(constructor.newInstance(resultSet)));
-
-            connection.close();
 
             return results;
         } catch (SQLException ex) {
@@ -134,8 +133,9 @@ public class SqlClient {
 
     public void exec(String query, Object... parameters)
             throws CuikInternalException {
-        try {
-            prepareStatement(connect(), query, parameters).execute();
+        try (var connection = connect();
+                var statement = prepareStatement(connection, query, parameters)) {
+            statement.execute();
         } catch (SQLException ex) {
             throw new CuikInternalException(
                     String.format(Messages.SqlException, ex.getMessage()),

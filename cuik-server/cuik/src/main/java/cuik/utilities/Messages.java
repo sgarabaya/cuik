@@ -28,9 +28,13 @@ public final class Messages {
 
     // Server / framework
     public static String ShouldHaveBeenJson = "Debería haber sido JSON?";
+    public static String UnsupportedMediaType = "Tipo de contenido no soportado";
+    public static String BodyTooLarge = "El cuerpo de la solicitud es demasiado grande";
+    public static String InternalServerError = "Error interno del servidor";
     public static String InvalidController = "%s no es un controlador válido";
     public static String PathCannotBeNull = "El argumento path no puede ser nulo";
     public static String HandlerCannotBeNull = "El argumento handler no puede ser nulo";
+    public static String MissingStaticPathConfig = "Falta configuracion para el '/public'";
 
     // Data layer
     public static String TypeNeedsEmptyConstructor = "El tipo %s necesita un constructor público y sin argumentos";
