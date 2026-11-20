@@ -7,11 +7,14 @@ import com.google.gson.JsonElement;
 
 import cuik.data.Repository;
 import cuik.data.models.BaseEntity;
+import cuik.exceptions.CuikNotFoundException;
+import cuik.exceptions.CuikValidationException;
 import cuik.server.annotations.Delete;
 import cuik.server.annotations.FromBody;
 import cuik.server.annotations.Get;
 import cuik.server.annotations.Post;
 import cuik.server.annotations.Put;
+import cuik.utilities.validation.Validator;
 
 public abstract class CrudController<T extends BaseEntity, R extends Repository<T>>
         extends BaseController {
@@ -32,9 +35,10 @@ public abstract class CrudController<T extends BaseEntity, R extends Repository<
 
     @Get("{id}")
     public T fetchById(String id) throws Exception {
-        // TODO: validar id es correcto uuid
-        var uuid = UUID.fromString(id);
-        return repository.fetchById(uuid);
+        var entity = repository.fetchById(parseId(id));
+        if (entity == null)
+            throw new CuikNotFoundException();
+        return entity;
     }
 
     @Post
@@ -44,17 +48,20 @@ public abstract class CrudController<T extends BaseEntity, R extends Repository<
 
     @Put("{id}")
     public boolean update(String id, @FromBody JsonElement payload) throws Exception {
-        // TODO: validar id es correcto uuid
-        var uuid = UUID.fromString(id);
-        var object = repository.fetchById(uuid);
+        var object = repository.fetchById(parseId(id));
+        if (object == null)
+            throw new CuikNotFoundException();
 
         return repository.update(_update(object, payload));
     }
 
     @Delete("{id}")
     public void delete(String id) throws Exception {
-        // TODO: validar id es correcto uuid
-        var uuid = UUID.fromString(id);
-        repository.delete(uuid);
+        repository.delete(parseId(id));
+    }
+
+    private UUID parseId(String id) throws CuikValidationException {
+        Validator.of(id, "id").notNull().uuid().check();
+        return UUID.fromString(id);
     }
 }

@@ -2,15 +2,13 @@ package cuik.server.router;
 
 import java.util.ArrayList;
 
+import cuik.utilities.Messages;
+
 public record Route(RoutePart[] parts, String[] params, RouteHandler handler) {
     public static Route from(String method, String path, RouteHandler handler) {
-        if (path == null) throw new IllegalArgumentException(
-            "Argument path cannot be null"
-        );
+        if (path == null) throw new IllegalArgumentException(Messages.PathCannotBeNull);
 
-        if (handler == null) throw new IllegalArgumentException(
-            "Argument handler cannot be null"
-        );
+        if (handler == null) throw new IllegalArgumentException(Messages.HandlerCannotBeNull);
 
         var fragments = path.trim().split("/");
 

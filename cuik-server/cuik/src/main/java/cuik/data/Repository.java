@@ -3,6 +3,7 @@ package cuik.data;
 import cuik.data.models.BaseEntity;
 import cuik.exceptions.CuikInternalException;
 import cuik.utilities.Configuration;
+import cuik.utilities.Messages;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -169,7 +170,7 @@ public abstract class Repository<T extends BaseEntity> {
             try (var stmt = preparedStatement(conn, query, columns.values().toArray())) {
                 if (stmt.executeUpdate() != 1)
                     throw new CuikInternalException(
-                            String.format("Could not create %s", getModelClass().getSimpleName()));
+                            String.format(Messages.CouldNotCreateEntity, getModelClass().getSimpleName()));
             }
         }
 
@@ -180,7 +181,7 @@ public abstract class Repository<T extends BaseEntity> {
 
     public boolean update(T obj) throws Exception {
         if (obj.getId() == null)
-            throw new IllegalArgumentException("No se puede actualizar una entidad sin id");
+            throw new IllegalArgumentException(Messages.CannotUpdateWithoutId);
 
         var columns = new HashMap<String, Object>();
 

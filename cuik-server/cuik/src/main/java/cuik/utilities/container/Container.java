@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import cuik.exceptions.ContainerException;
+import cuik.utilities.Messages;
 
 public abstract class Container {
 
@@ -50,7 +51,7 @@ public abstract class Container {
 
                 return instance;
             } catch (Exception e) {
-                throw new ContainerException("Failed to instantiate " + classT.getName(), e);
+                throw new ContainerException(String.format(Messages.FailedToInstantiate, classT.getName()), e);
             }
         };
     }
@@ -60,11 +61,11 @@ public abstract class Container {
             var buildFn = registry.get(classT);
 
             if (buildFn == null)
-                throw new ContainerException(String.format("Failed to instantiate type %s", classT.getName()));
+                throw new ContainerException(String.format(Messages.FailedToInstantiateType, classT.getName()));
 
             return classT.cast(buildFn.call());
         } catch (Exception ex) {
-            throw new ContainerException(String.format("Failed to build %s", classT.getName()), ex);
+            throw new ContainerException(String.format(Messages.FailedToBuild, classT.getName()), ex);
         }
     }
 
@@ -104,7 +105,7 @@ public abstract class Container {
         }
 
         if (bestConstructor == null)
-            throw new ContainerException("Dependency injection needs a constructor");
+            throw new ContainerException(Messages.DependencyInjectionNeedsConstructor);
 
         bestConstructor.setAccessible(true);
         return bestConstructor;

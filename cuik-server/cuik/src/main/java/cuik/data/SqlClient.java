@@ -2,6 +2,7 @@ package cuik.data;
 
 import cuik.exceptions.CuikInternalException;
 import cuik.utilities.Configuration;
+import cuik.utilities.Messages;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
@@ -36,7 +37,7 @@ public class SqlClient {
             return cache.get(classT);
         } catch (NoSuchMethodException ex) {
             throw new CuikInternalException(
-                    "Mappable model needs an empty constructor",
+                    Messages.MappableModelNeedsConstructor,
                     ex);
         }
     }
@@ -93,11 +94,11 @@ public class SqlClient {
             return result;
         } catch (SQLException ex) {
             throw new CuikInternalException(
-                    String.format("SQL Exception: %s", ex.getMessage()),
+                    String.format(Messages.SqlException, ex.getMessage()),
                     ex);
         } catch (Exception ex) {
             throw new CuikInternalException(
-                    String.format("Unexpected exception: %s", ex.getMessage()),
+                    String.format(Messages.UnexpectedException, ex.getMessage()),
                     ex);
         }
     }
@@ -122,11 +123,11 @@ public class SqlClient {
             return results;
         } catch (SQLException ex) {
             throw new CuikInternalException(
-                    String.format("SQL Exception: %s", ex.getMessage()),
+                    String.format(Messages.SqlException, ex.getMessage()),
                     ex);
         } catch (Exception ex) {
             throw new CuikInternalException(
-                    String.format("Unexpected exception: %s", ex.getMessage()),
+                    String.format(Messages.UnexpectedException, ex.getMessage()),
                     ex);
         }
     }
@@ -137,7 +138,7 @@ public class SqlClient {
             prepareStatement(connect(), query, parameters).execute();
         } catch (SQLException ex) {
             throw new CuikInternalException(
-                    String.format("SQL Exception: %s", ex.getMessage()),
+                    String.format(Messages.SqlException, ex.getMessage()),
                     ex);
         }
     }

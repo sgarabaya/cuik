@@ -15,6 +15,7 @@ import cuik.server.annotations.View;
 import cuik.server.router.RouteHandler;
 import cuik.server.router.Router;
 import cuik.utilities.CuikLogger;
+import cuik.utilities.Messages;
 import cuik.utilities.Tuple3;
 import cuik.utilities.container.Container;
 
@@ -71,7 +72,7 @@ public class ControllerHandler implements RouteHandler {
                     if (context.isJson())
                         paramValues[i] = context.parseBody(param.b());
                     else
-                        throw new CuikInternalException("Should have been JSON?");
+                        throw new CuikInternalException(Messages.ShouldHaveBeenJson);
                 } else {
                     System.out.println("Param: " + param.a());
                     System.out.println(context.getQueryParam(param.a()));

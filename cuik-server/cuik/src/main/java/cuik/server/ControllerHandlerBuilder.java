@@ -17,12 +17,13 @@ import cuik.server.annotations.Get;
 import cuik.server.annotations.Post;
 import cuik.server.annotations.Put;
 import cuik.server.annotations.View;
+import cuik.utilities.Messages;
 
 public abstract class ControllerHandlerBuilder {
 
     public static List<AuthenticatedHandler> from(Class<?> controller) throws CuikInternalException {
         if (!controller.isAnnotationPresent(Controller.class) || !BaseController.class.isAssignableFrom(controller))
-            throw new CuikInternalException(controller.getName() + " is not a valid Controller");
+            throw new CuikInternalException(String.format(Messages.InvalidController, controller.getName()));
 
         var handlers = new ArrayList<AuthenticatedHandler>();
 

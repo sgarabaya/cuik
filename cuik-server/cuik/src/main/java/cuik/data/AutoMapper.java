@@ -1,6 +1,7 @@
 package cuik.data;
 
 import cuik.exceptions.CuikInternalException;
+import cuik.utilities.Messages;
 import cuik.utilities.Strings;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -61,7 +62,7 @@ public abstract class AutoMapper {
         if (constructor.isEmpty())
             throw new CuikInternalException(
                     String.format(
-                            "Type %s needs a public, empty constructor",
+                            Messages.TypeNeedsEmptyConstructor,
                             classT.getSimpleName()));
 
         var currentClass = classT;
@@ -119,7 +120,7 @@ public abstract class AutoMapper {
                 | IllegalAccessException ex) {
             throw new CuikInternalException(
                     String.format(
-                            "Error while trying to map %s",
+                            Messages.ErrorMappingType,
                             classT.getSimpleName()),
                     ex);
         }

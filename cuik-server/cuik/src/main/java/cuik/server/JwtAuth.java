@@ -9,6 +9,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import cuik.data.Role;
 import cuik.exceptions.CuikValidationException;
 import cuik.utilities.Configuration;
+import cuik.utilities.Messages;
 
 public abstract class JwtAuth {
 
@@ -32,20 +33,20 @@ public abstract class JwtAuth {
             try {
                 jwt = VERIFIER.verify(token);
             } catch (JWTVerificationException ex) {
-                throw new CuikValidationException("Token inválido o expirado", 401);
+                throw new CuikValidationException(Messages.TokenExpiredOrInvalid, 401);
             }
 
             role = Role.fromClaim(jwt.getClaim("role").asString());
             if (role == null)
-                throw new CuikValidationException("Token inválido", 401);
+                throw new CuikValidationException(Messages.InvalidToken, 401);
         }
 
         if (role.satisfies(required))
             return;
 
         if (token == null)
-            throw new CuikValidationException("Se requiere autenticación", 401);
+            throw new CuikValidationException(Messages.AuthenticationRequired, 401);
 
-        throw new CuikValidationException("Permisos insuficientes", 403);
+        throw new CuikValidationException(Messages.InsufficientPermissions, 403);
     }
 }

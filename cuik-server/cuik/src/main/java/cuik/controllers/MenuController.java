@@ -9,8 +9,8 @@ import cuik.data.pojo.payloads.MenuPayload;
 import cuik.server.annotations.Authenticate;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.Get;
-import cuik.utilities.Strings;
 import cuik.utilities.Transform;
+import cuik.utilities.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import com.google.gson.JsonElement;
 
+@Authenticate(Role.Employee)
 @Controller("/api/menus")
 public class MenuController extends CrudController<Menu, MenuRepository> {
     private MenuItemRepository menuItemRepository;
@@ -30,8 +31,9 @@ public class MenuController extends CrudController<Menu, MenuRepository> {
 
     @Override
     protected Menu _create(JsonElement element) throws Exception {
-        // Validar que tenga name y isActive = false (en creacion el menu no se activa)
         var payload = Transform.fromJsonElement(element, MenuPayload.class);
+
+        Validator.of(payload.name(), "nombre").notNull().notBlank().lengthBetween(2, 40).check();
 
         var menu = new Menu();
 
@@ -45,8 +47,10 @@ public class MenuController extends CrudController<Menu, MenuRepository> {
     protected Menu _update(Menu object, JsonElement element) throws Exception {
         var payload = Transform.fromJsonElement(element, MenuPayload.class);
 
-        if (!Strings.isEmpty(payload.name()))
+        if (payload.name() != null) {
+            Validator.of(payload.name(), "nombre").notBlank().lengthBetween(2, 40).check();
             object.setName(payload.name());
+        }
 
         if (payload.isActive() != null)
             object.setActive(payload.isActive());

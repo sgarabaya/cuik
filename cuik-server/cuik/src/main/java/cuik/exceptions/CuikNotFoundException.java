@@ -1,7 +1,9 @@
 package cuik.exceptions;
 
+import cuik.utilities.Messages;
+
 public class CuikNotFoundException extends CuikValidationException {
     public CuikNotFoundException() {
-        super("Not found", 404);
+        super(Messages.NotFound, 404);
     }
 }
