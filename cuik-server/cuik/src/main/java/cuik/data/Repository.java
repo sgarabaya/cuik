@@ -7,13 +7,11 @@ import cuik.utilities.Messages;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 
 public abstract class Repository<T extends BaseEntity> {
 

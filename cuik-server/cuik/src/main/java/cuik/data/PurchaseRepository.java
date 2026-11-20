@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import cuik.data.models.Purchase;
-import cuik.data.models.PurchaseItem;
 import cuik.data.pojo.PurchaseView;
 
 public class PurchaseRepository extends Repository<Purchase> {
