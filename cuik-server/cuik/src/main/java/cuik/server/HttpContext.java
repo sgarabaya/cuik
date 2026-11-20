@@ -67,8 +67,22 @@ public class HttpContext {
         return params.getOrDefault(key, null);
     }
 
+    public String getHeader(String name) {
+        return request.getHeaders().get(name);
+    }
+
+    public String getBearerToken() {
+        var header = getHeader("Authorization");
+        if (header == null || header.length() <= 7 || !header.regionMatches(true, 0, "Bearer ", 0, 7))
+            return null;
+
+        var token = header.substring(7).trim();
+        return token.isEmpty() ? null : token;
+    }
+
     public boolean isJson() {
-        return request.getHeaders().get("Content-Type") == "application/json";
+        var contentType = getHeader("Content-Type");
+        return contentType != null && contentType.toLowerCase().startsWith("application/json");
     }
 
     public <T> T parseBody(Class<T> classT) throws Exception {
@@ -89,6 +103,12 @@ public class HttpContext {
 
     public void setContentType(String contentType) {
         response.getHeaders().put("Content-Type", contentType);
+    }
+
+    public void respondError(int status, String message) {
+        setContentType("application/json");
+        response.setStatus(status);
+        respond(Transform.toJsonBytes(java.util.Map.of("error", message)));
     }
 
     // Respond with an error

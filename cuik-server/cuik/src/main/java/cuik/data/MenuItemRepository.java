@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import cuik.data.models.MenuItem;
-import cuik.data.models.NutritionalFacts;
 import cuik.data.pojo.MenuItemSearchResult;
 
 public class MenuItemRepository extends Repository<MenuItem> {
@@ -25,7 +24,7 @@ public class MenuItemRepository extends Repository<MenuItem> {
 
     public List<MenuItem> fetchByMenuId(UUID menuId) throws Exception {
         var queryString = """
-                SELECT 
+                SELECT
                     MI.*,
                     NF.id AS NutritionalFact__id,
                     NF.description AS NutritionalFact__description,
@@ -39,7 +38,6 @@ public class MenuItemRepository extends Repository<MenuItem> {
                 LEFT JOIN NutritionalFacts NF ON NF.menu_item_id = MI.id
                 WHERE MI.menu_id = ?;
                             """;
-
 
         return query(queryString, menuId.toString());
     }

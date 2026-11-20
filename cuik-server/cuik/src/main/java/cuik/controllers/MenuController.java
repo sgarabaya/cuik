@@ -1,11 +1,12 @@
 package cuik.controllers;
 
-import cuik.adapters.MenuAdapter;
 import cuik.data.MenuItemRepository;
 import cuik.data.MenuRepository;
+import cuik.data.Role;
 import cuik.data.models.Menu;
 import cuik.data.models.MenuItem;
 import cuik.data.pojo.payloads.MenuPayload;
+import cuik.server.annotations.Authenticate;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.Get;
 import cuik.utilities.Strings;
@@ -55,6 +56,7 @@ public class MenuController extends CrudController<Menu, MenuRepository> {
 
     @Override
     @Get
+    @Authenticate(Role.Guest)
     public List<Menu> fetch() throws Exception {
         var menus = super.fetch();
 
@@ -74,13 +76,5 @@ public class MenuController extends CrudController<Menu, MenuRepository> {
         }
 
         return menus;
-    }
-
-    @Get("{id}/items")
-    public List<MenuItem> getItems(String id) throws Exception {
-        // TODO: validar id
-        var menuId = Strings.safeParseUUID(id);
-
-        return repository.fetchItems(menuId);
     }
 }

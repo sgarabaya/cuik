@@ -1,7 +1,6 @@
 package cuik.data;
 
 import cuik.data.models.Employee;
-import cuik.data.models.User;
 
 public class EmployeeRepository extends Repository<Employee> {
     public EmployeeRepository(SqlClient client) {

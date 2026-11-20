@@ -8,7 +8,9 @@ import java.util.List;
 import org.eclipse.jetty.http.HttpMethod;
 
 import cuik.controllers.BaseController;
+import cuik.data.Role;
 import cuik.exceptions.CuikInternalException;
+import cuik.server.annotations.Authenticate;
 import cuik.server.annotations.Controller;
 import cuik.server.annotations.Delete;
 import cuik.server.annotations.Get;
@@ -18,11 +20,11 @@ import cuik.server.annotations.View;
 
 public abstract class ControllerHandlerBuilder {
 
-    public static List<ControllerHandler> from(Class<?> controller) throws CuikInternalException {
+    public static List<AuthenticatedHandler> from(Class<?> controller) throws CuikInternalException {
         if (!controller.isAnnotationPresent(Controller.class) || !BaseController.class.isAssignableFrom(controller))
             throw new CuikInternalException(controller.getName() + " is not a valid Controller");
 
-        var handlers = new ArrayList<ControllerHandler>();
+        var handlers = new ArrayList<AuthenticatedHandler>();
 
         var controllerAnnotation = controller.getAnnotation(Controller.class);
         var basePath = controllerAnnotation.value();
@@ -55,9 +57,24 @@ public abstract class ControllerHandlerBuilder {
         return Path.of(base.trim(), path.trim()).toString();
     }
 
-    private static ControllerHandler createHandler(
+    // Method auth > Controller auth
+    private static Role resolveRole(Class<?> controller, Method method) {
+        var auth = method.getAnnotation(Authenticate.class);
+
+        if (auth == null)
+            auth = controller.getAnnotation(Authenticate.class);
+
+        return auth == null ? null : auth.value();
+    }
+
+    private static AuthenticatedHandler createHandler(
             Class<?> controller, Method method,
             HttpMethod http, String basePath, String path) {
-        return new ControllerHandler(controller, method, http, combinePaths(basePath, path));
+        var fullPath = combinePaths(basePath, path);
+
+        return new AuthenticatedHandler(
+                new ControllerHandler(controller, method, http, fullPath),
+                resolveRole(controller, method),
+                http, fullPath);
     }
 }

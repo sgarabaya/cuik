@@ -3,15 +3,18 @@ package cuik.controllers;
 import com.google.gson.JsonElement;
 
 import cuik.data.EmployeeRepository;
+import cuik.data.Role;
 import cuik.data.models.Employee;
 import cuik.data.pojo.payloads.EmployeePayload;
 import cuik.exceptions.CuikValidationException;
+import cuik.server.annotations.Authenticate;
 import cuik.server.annotations.Controller;
 import cuik.utilities.Crypto;
 import cuik.utilities.Messages;
 import cuik.utilities.Strings;
 import cuik.utilities.Transform;
 
+@Authenticate(Role.Admin) // solo el admin
 @Controller("/api/employees")
 public class EmployeeController extends CrudController<Employee, EmployeeRepository> {
     public EmployeeController(EmployeeRepository repository) {
